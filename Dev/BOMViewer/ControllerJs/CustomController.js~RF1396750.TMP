@@ -1,0 +1,511 @@
+﻿'use strict';
+
+angular.module('BOMViewer')
+    .controller('customVisualisation', customVisualisation)
+    .controller('customVisualisationField', customVisualisationField)
+    .controller('customVisualisationLine', customVisualisationLine)    
+
+// Injection des dépendances des contrôleurs
+customVisualisation.$inject = ['$scope', '$location', '$http', '$window', 'ViewSetting', 'ViewSettingQuery', 'User'];
+customVisualisationField.$inject = ['$scope', '$http', '$q', 'User', 'ViewSetting', 'ViewSettingQuery'];
+customVisualisationLine.$inject = ['$scope', '$http', 'ViewSetting', 'ViewSettingQuery', 'User'];
+
+
+function customVisualisation($scope, $location, $http, $window, ViewSetting, ViewSettingQuery, User) {    
+    // Accordion
+    $scope.animationDuration = 300;
+    $scope.collapsible = true;
+    $scope.multiple = true;
+    $scope.selectedItems = false; // No one will be expanded by default
+    $scope.toDisplayForView = false; // Wait to click on a view to display options
+    $scope.listColumnViewEnable = false; /// To enable the saving of preference column view
+
+
+    // Widget de l'accordéon
+    $scope.accordionOptions = {
+        dataSource: accordionItems,
+        itemTemplate: "options",
+        bindingOptions: {
+            animationDuration: "animationDuration",
+            collapsible: "collapsible",
+            multiple: "multiple",
+            selectedItems: "selectedItems"
+        }
+    };
+
+    // Widget Bouton
+    $scope.applyButtonOptions = {
+        text: "Sauvegarder",
+        type: "success",
+        width: 150,
+        bindingOptions: {
+            disabled: '!toDisplayForView'
+        },        
+        onClick: function (e) {
+            //console.log(ViewSetting.getIdTypeLine());
+            $scope.returnNotification;           
+            if (ViewSetting.getPrimaryList() != null) //Only if one type of line is selected
+            {
+                //To UPDATE Column of the view
+                $http({
+                    url: 'Api/UpdatePreferenceColumnOfView',
+                    method: 'GET',
+                    params: {
+                        idView: $scope.IdViewSelected,
+                        idSubLevel: ViewSetting.getIdTypeLine(),
+                        listePrincipale: ViewSetting.getPrimaryList(),
+                        listeSecondaire: ViewSetting.getSecondaryList()
+                    }
+                }).then(function (response) {
+                    //console.log(response.data);                
+                    if (response.data === "True") {
+                        $scope.returnNotification += "Configuration sauvegardée ! (zone)";                        
+                    }
+                    else {
+                        $scope.returnNotification += "Erreur dans la sauvegarde de la configuration (zone) ! Veuillez réessayez plus tard...";                         
+                    }
+                }), function (response) {
+                };
+            }
+
+
+            if (ViewSetting.getListLine() != null) //Only the accordion field 'choix des lignes' is expanded
+            { 
+                //To UPDATE Level Type of the view
+                $http({
+                    url: 'Api/UpdatePreferenceLineOfView',
+                    method: 'GET',
+                    params: {
+                        ID_View: $scope.IdViewSelected,
+                        ListLine: ViewSetting.getListLine()
+                    }
+                }).then(function (response) {
+                    console.log(response.data);
+                    if (response.data === "True") {
+                        $scope.returnNotification += "Configuration sauvegardée ! (ligne)";                        
+                    }
+                    else {
+                        $scope.returnNotification += "Erreur dans la sauvegarde de la configuration (ligne) ! Veuillez réessayez plus tard...";                              
+                    }
+                }), function (response) {
+                };
+            }
+
+            if ($scope.returnNotification === '')
+            {
+                $scope.returnNotification = 'Aucune modification'
+            }
+            DevExpress.ui.notify($scope.returnNotification);
+            $scope.returnNotification = '';
+
+        }
+    };
+    
+    $scope.cancelButtonOptions = {
+        text: "Annuler",
+        type: "danger",
+        width: 100,
+        bindingOptions: {
+            disabled: '!toDisplayForView'
+        },      
+        onClick: function (e) {
+            if (ViewSetting.getPrimaryList() != null) //Only if one type of line is selected
+            {
+                ViewSettingQuery.updatePreferenceColumnOfViewAll($scope.IdViewSelected, ViewSetting.getListeDefaultP(), ViewSetting.getListeDefaultS());
+
+
+                // On update les préférences des colonnes avec celle de base lors du chargement de la vue
+                $http({
+                    url: 'Api/UpdatePreferenceColumnOfViewAll',
+                    method: 'GET',
+                    params: {
+                        idView: $scope.IdViewSelected,
+                        listePrincipale: ViewSetting.getPrimaryListInitial(),
+                        listeSecondaire: ViewSetting.getSecondaryListInitial()
+                    }
+                }).then(function (response) {
+                    console.log(response.data);
+                    console.log(response);
+                    if (response.data === "True") {
+                        $scope.returnNotification += "Modifications annulées!";
+
+                        $scope.selectedItemsPrimary = ViewSetting.getPrimaryListInitial();
+                        $scope.selectedItemsSecondary = ViewSetting.getSecondaryListInitial();
+                        ViewSetting.setPrimaryList($scope.selectedItemsPrimary);
+                        ViewSetting.setSecondaryList($scope.selectedItemsSecondary);
+                    }
+                    else
+                        $scope.returnNotification += "Erreur dans l'annulation des modifications ! Veuillez réessayez plus tard...";
+
+                }), function (response) {
+                    console.log(response);
+                };
+            }
+
+            if (ViewSetting.getListLine() != null) //Only the accordion field 'choix des lignes' is expanded
+            {
+                //To UPDATE Level Type of the view
+                $http({
+                    url: 'Api/UpdatePreferenceLineOfView',
+                    method: 'GET',
+                    params: {
+                        ID_View: $scope.IdViewSelected,
+                        ListLine: ViewSetting.getListLineInitial()
+                    }
+                }).then(function (response) {
+                    console.log(response.data);
+                    if (response.data === "True") {
+                        $scope.returnNotification += "Modifications annulées ! (ligne)";
+                        ViewSetting.setListLine(ViewSetting.getListLineInitial())
+                    }
+                    else {
+                        $scope.returnNotification += "Erreur dans l'annulation des modifications ! Veuillez réessayez plus tard...";
+                    }
+                }), function (response) {
+                };
+            }
+
+            if ($scope.returnNotification === '')
+            {
+                $scope.returnNotification = 'Aucune modification à annuler'
+            }
+            DevExpress.ui.notify($scope.returnNotification);
+            $scope.returnNotification = '';
+        }
+    };
+
+
+
+    $http({
+        url: 'Api/GetViewList',
+        method: 'GET',
+        params: {
+            ID_User: User.getID_User()
+        }
+    }).then(function (response) {
+        $scope.result = response.data;
+        //console.log($scope.result);
+
+        //WIDGET List of the view 
+        $scope.listOfView = {
+            items: $scope.result,
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une vue",
+            displayExpr: "ViewName",
+            onItemClick: function (e) {
+                //console.log(e.itemData);
+                $scope.toDisplayForView = true;
+                $scope.ViewName = e.itemData.ViewName;
+                $scope.ViewDesc = e.itemData.ViewDesc;
+                $scope.IdViewSelected = e.itemData.ID_View;
+            }
+        };
+        
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };
+
+}
+
+// COLUMNS LIST \\
+function customVisualisationField($scope, $http, $q, User, ViewSetting, ViewSettingQuery) {
+
+    var listeP;
+    var listeS;
+    var i;
+    var firstTime = true;
+    $scope.listOptionsPrincipaleInstance = null;
+    $scope.listOptionsDetailInstance = null;
+
+    //Une fois une vue sélectionnée, on charge tous ses paramètres de départ dans le cas
+    // où l'utilisateur annule ses changements, on pourra revenir en arrière grâce à ce charegement
+    ViewSettingQuery.getPreferenceColumnOfViewAll($scope.IdViewSelected);
+
+    // Affiche la liste des tables 
+    $http({
+        url: 'Api/getTableList',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.resultTable = response.data;
+
+        // WIDGET List of Table
+        $scope.lookupOptionsTable = {
+            dataSource: $scope.resultTable,
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une table",
+            displayExpr: "TableName",
+            onValueChanged: function (e) {
+                $scope.SystemName = e.value.SystemName;
+                $scope.LibraryName = e.value.LibraryName;
+                $scope.TableName = e.value.TableName;
+                $scope.valueLine;
+
+                if (e.value.TableName === 'CDENT') {
+                    $scope.valueLine = 25;
+                }
+                if (e.value.TableName === 'CDLGN') {
+                    $scope.valueLine = 26;
+                }
+
+                $http({
+                    url: 'Api/GetTypeLineOfTable',
+                    method: 'GET',
+                    params: {
+                        tableName: $scope.TableName
+                    }
+                }).then(function (response) {
+                    $scope.resultTypeLine = response.data;
+                    //console.log($scope.resultTypeLine);
+                    $scope.listColumnViewEnable = true; // To enable the saving of preference column view
+
+                    // WIDGET List of Line type
+                    $scope.lookupOptionsLine = {
+                        bindingOptions: {
+                            dataSource: "resultTypeLine",
+                            value: "valueLine"
+                        },
+                        valueExpr: "ID_TableSubLevel",
+                        showPopupTitle: false,
+                        closeOnOutsideClick: true,
+                        placeholder: "Sélectionner un type de ligne",
+                        displayExpr: "TableSubLevelType",
+                        onValueChanged: function (e) {
+                            //console.log(e);
+                            $scope.Id_SubLevel = e.value;
+                            ViewSetting.setIdTypeLine($scope.Id_SubLevel);
+
+                            // Charge les listes pour les deux zones, avec les items sélectionnés en avant, selo leur position
+                            getListOfTypeLine(0);
+                            getListOfTypeLine(1);
+
+                            if (!firstTime) {
+                                // A partir de la deuxième recherche, on enregistre les préférences de la cible précédente
+                                $scope.previousIdSubLevel = e.previousValue;
+                                console.log($scope.primarySelectedItems, $scope.secondarySelectedItems);
+                                ViewSettingQuery.updatePreferenceColumnOfView($scope.IdViewSelected, $scope.previousIdSubLevel, $scope.primarySelectedItems, $scope.secondarySelectedItems);
+                            }
+
+                            $scope.toDisplay = true;
+                            firstTime = false;
+
+ 
+                            // Récupère les préférences des 2 zones
+                            ViewSettingQuery.getPreferenceColumnOfView($scope.IdViewSelected, $scope.Id_SubLevel)
+
+                            console.log(ViewSetting.getPrimaryList(), ViewSetting.getSecondaryList())
+                            //$scope.primarySelectedItems = ViewSetting.getPrimaryList();
+                            //$scope.secondarySelectedItems = ViewSetting.getSecondaryList();
+                            
+                                                        
+
+
+                            // WIDGET contenant la liste des paramètres pour la zone d'arboresence
+                            // TODO :: Mettre en avant les champs sélectionner dans la liste
+                            $scope.listOptionsPrincipale = {
+                                height: 650,
+                                keyExpr: "key",
+                                bindingOptions: {
+                                    selectAllMode: "allPages",
+                                    selectionMode: "multiple",
+                                    dataSource: "listTreeView",
+                                    selectedItemKeys: "primarySelectedItems"
+                                },
+                                allowItemReordering: true,
+                                showSelectionControls: true,
+                                searchEnabled: true,
+                                searchMode: "contains",
+                                searchExpr: ['ColumnName', 'ColumnDesc'],
+                                onContentReady: function (e) {
+                                    $scope.listOptionsPrincipaleInstance = e.component;
+                                },
+                                onItemClick: function (item) {
+                                    //console.log(item);
+                                    ViewSetting.setPrimaryList($scope.primarySelectedItems);
+                                    console.log(ViewSetting.getPrimaryList());
+                                },
+                                onItemReordered: function (e) {
+                                    // Besoin de le re-seléctionner une fois bouger car sinon la liste ne prend pas en compte sa position
+                                    if ($scope.listOptionsPrincipaleInstance.isItemSelected(e.toIndex)) {
+                                        $scope.listOptionsPrincipaleInstance.unselectItem(e.toIndex);
+                                        $scope.listOptionsPrincipaleInstance.selectItem(e.toIndex);
+                                    }
+                                    ViewSetting.setPrimaryList($scope.primarySelectedItems);
+                                    $scope.listOptionsPrincipaleInstance.repaint();
+                                }
+                            };
+                            
+
+                            // WIDGET contenant la liste des paramètres pour la zone de détail
+                            $scope.listOptionsSecondaire = {
+                                height: 650,
+                                keyExpr: "key",
+                                bindingOptions: {
+                                    selectAllMode: "allPages",
+                                    selectionMode: "all",
+                                    dataSource: "listDetailView",
+                                    selectedItemKeys: "secondarySelectedItems"
+                                },
+                                allowItemReordering: true,
+                                showSelectionControls: true,
+                                searchEnabled: true,
+                                searchMode: "contains",
+                                searchExpr: ['ColumnName', 'ColumnDesc'],
+                                onContentReady: function (e) {
+                                    $scope.listOptionsDetailInstance = e.component;
+                                },
+                                onItemClick: function (item) {
+                                    //console.log(item);
+                                    ViewSetting.setSecondaryList($scope.secondarySelectedItems);
+                                    console.log(ViewSetting.getSecondaryList());
+
+                                },
+                                onItemReordered: function (e) {
+                                    if ($scope.listOptionsDetailInstance.isItemSelected(e.toIndex)) {
+                                        $scope.listOptionsDetailInstance.unselectItem(e.toIndex);
+                                        $scope.listOptionsDetailInstance.selectItem(e.toIndex);
+                                    }
+                                    ViewSetting.setSecondaryList($scope.secondarySelectedItems);
+                                    $scope.listOptionsDetailInstance.repaint();
+                                },
+                            };
+                            
+                           
+                        }
+                    };
+                }), function (response) {
+                    console.log(response);
+                    alert(reponse);
+                };
+            }
+        };
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };
+
+
+    // Return the list of type line with specification if the line is marked in the configuration of the view depending of DetailLevel
+    function getListOfTypeLine(detailLevel) {
+        var defer = $q.defer();      
+
+        $http({
+            url: 'Api/getListOfTypeLine',
+            method: 'GET',
+            params: {
+                systemName: $scope.SystemName,
+                libraryName: $scope.LibraryName,
+                tableName: $scope.TableName,
+                ID_SubLevel: $scope.Id_SubLevel,
+                ID_View: User.getID_View(User.getID_User()),
+                DetailLevel: detailLevel
+            }
+        }).then(function (response) {
+            console.log(detailLevel, response.data);
+            if (detailLevel === 0) {
+                $scope.listTreeView = response.data;
+            }
+            else {                
+                $scope.listDetailView = response.data;                
+            }
+            defer.resolve("SUCCESS");            
+
+        }), function (response) {
+            console.log(response);
+            defer.reject(response);
+            alert(reponse);
+            };
+
+        console.log(defer.promise);
+        return defer.promise;
+    };
+    
+}
+
+// Type LINE FILTER \\ 
+function customVisualisationLine($scope, $http, ViewSetting, ViewSettingQuery, User) {
+
+    // Get the list of the preference of the view selected
+    GetPreferenceLineOfView();
+
+    // Load all the list of each type line of tables
+    $http({
+        url: 'Api/GetTableSubLevels',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.resultLine = response.data;
+        //console.log($scope.resultLine);
+
+        // Groupe the array with a selector
+        var dataSourceGrouped = new DevExpress.data.DataSource({
+            store: $scope.resultLine,
+            group: { selector: "TableName"}            
+        });        
+        //console.log(dataSourceGrouped);
+
+
+        // WIDGET List of Line
+        $scope.listOptionsLine = {
+            height: 650,            
+            dataSource: dataSourceGrouped,
+            bindingOptions: {                
+                selectedItemKeys: 'selectedItemsLine'
+            },
+            keyExpr: "ID_TableSubLevel",
+            showSelectionControls: true,
+            searchEnabled: true,
+            searchMode: "contains",
+            searchExpr: ['TableSubLevelType'],
+            selectionMode: "all",
+            selectAllMode: "allPages",            
+            grouped: true,
+            collapsibleGroups: true,      
+            onContentReady: function (e) {
+                //$scope.listLineInstance = e.component;
+            },
+            onItemClick: function (item) {                
+                console.log($scope.selectedItemsLine);
+                ViewSetting.setListLine($scope.selectedItemsLine.join(','));                
+            }
+        };
+    }), function (response) {
+        console.log(response);
+        alert("Erreur lors du chargement de la liste des types de lignes...");
+        };
+
+
+
+
+
+    function GetPreferenceLineOfView() {
+        $http({
+            url: 'Api/GetPreferenceLineOfView',
+            method: 'GET',
+            params: {
+                ID_View: $scope.IdViewSelected                
+            }
+        }).then(function (response) {
+            //console.log(response.data)
+            var keyListSelected = [];
+            var i = 0;
+            while (i !== response.data.length) {
+                keyListSelected.push(response.data[i].ID_TableSubLevel);               
+                i++;
+            }                        
+            $scope.selectedItemsLine = keyListSelected;
+            ViewSetting.setListLine($scope.selectedItemsLine.join(','));
+            //console.log($scope.selectedItemsLine);
+
+            // keep the original data in the case when the user want to cancel his changes
+            $scope.originalSelectedItems = $scope.selectedItemsLine;
+            ViewSetting.setListLineInitial($scope.originalSelectedItems.join(','));
+            //console.log(ViewSetting.getListLineOriginal());
+        }), function (response) {
+            console.log(response);
+        };
+    }
+}
+

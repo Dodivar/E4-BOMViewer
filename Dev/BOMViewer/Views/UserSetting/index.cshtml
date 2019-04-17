@@ -1,0 +1,56 @@
+﻿@{
+    ViewBag.Title = "Custom User Setting";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="title col-sm-12">
+    <h1>Customisation de vos préférences</h1>
+</div>
+<hr />
+
+
+<div class="dx-viewport" ng-controller="UserSetting" ng-cloak>
+
+    <h3>Color Box</h3>
+    <div class="form">
+        <div class="dx-fieldset">
+            <div class="dx-field" ng-repeat="box in colorBox">
+
+                <div class="dx-field-label" ng-style="{'color': ColorValue.{{box.lib}}}">
+                    {{box.text}}
+                </div>
+                <div class="dx-field-value">
+                    <div dx-color-box="colorBox.{{box.lib}}"></div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+    <span ng-model="$storage.bool"></span>
+
+    <br />
+    <h3>Lignes supprimées</h3>
+
+    <div class="dx-field">
+        <div class="dx-field-value">
+            <div dx-check-box="checkBox.forDeletedLine"></div>
+        </div>
+    </div>
+
+
+    <!-- BUTTON -->
+    <div class="dx-field">
+        <div class="dx-field-value">
+            <div dx-button="cancelButton"></div>
+        </div>
+    </div>
+
+    <div class="dx-field">
+        <div class="dx-field-value">
+            <div dx-button="applyButton"></div>
+        </div>
+    </div>
+
+</div>

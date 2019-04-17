@@ -1,0 +1,138 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+    
+    if (Layout == null)
+    {
+        Layout = "~/Views/Shared/ForPartialViews/SearchMaster.cshtml";
+    }
+}
+
+<style>
+    /*  for angularJS element  */
+    input.ng-invalid {
+        background-color: lightgray;
+    }
+</style>
+
+<h3>d'une commande</h3>
+
+    <form name="searchOrder">
+        <div class="dx-fieldset">
+
+            <div class="dx-field">
+                <div class="dx-field-label">Agence :</div>
+                <div class="dx-field-value">
+                    <div dx-radio-group="radioGroupAgency"></div>
+                </div>
+            </div>            
+
+            <div class="dx-field">
+                <div class="dx-field-label">Librairie :</div>
+                <div class="dx-field">
+                    <div  dx-radio-group="radioGroupLibrary"></div>
+                </div>
+            </div>
+
+            <div class="dx-field">
+                <div class="dx-field-label">N° de commande :</div>
+                <div class="dx-field-value">
+                    <div id="Order" dx-text-box="textBoxOrder" required ng-minlength="9" ng-maxlength="9" ng-model="selectedOrder"></div>
+                </div>
+            </div>
+
+            <div class="dx-field">
+                <div class="dx-field-label">N° de ligne :</div>
+                <div class="dx-field-value">
+                    <div dx-text-box="textBoxLine" ng-model="selectedLine"></div>
+                </div>
+            </div>
+
+
+            <div class="dx-field">
+                <div class="dx-field-value">
+                    <div dx-button="cancelButtonOptions" ng-disabled="searchOrder.Order.$pristine||searchOrder.Order.$error.minlength||searchOrder.Order.$error.maxlength">Rechercher</div>
+                </div>
+            </div>
+
+            <div class="dx-field">
+                <div class="dx-field-value">
+                    <div dx-button="applyButtonOptions">Reset</div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+
+    <div class="jumbotron" ng-controller="searchRecherche" ng-init="getUserColor()" ng-cloak>
+
+
+        <form name="searchOrderOld" novalidate>
+
+            <span>Agence :</span>
+            <span ng-repeat="agence in Agency">
+                <label for="{{agence.Lib}}"> {{agence.Lib}} </label>
+                <input type="radio" name="filiale" id="{{agence.Lib}}" value="{{agence.id}}" ng-model="selectedAgency" />
+
+            </span>
+            <br />
+
+
+            <label for="Order">Bibliothèque :</label>
+            <select name="listBib" ng-model="selectedLibrary" ng-options="x.Lib for x in Library" autofocus required></select>
+
+            ><
+
+
+            <br />
+
+
+
+
+
+            <label for="Order">N° Commande :  </label>
+
+            <input name="Order" id="Order" type="text" ng-model="selectedOrder" ng-minlength="9" ng-maxlength="9" placeholder="Commande" required />
+            <span class="text-danger" ng-show="Search.Order.$error.minlength||Search.Order.$error.maxlength">
+                Le numéro de commande doit contenir 9 caractères
+            </span>
+            <br />
+
+
+            <label for="Line">N° Ligne :</label>
+            <input id="Line" type="text" ng-model="selectedLine" ng-minlength="2" ng-maxlength="3" placeholder="N° ligne" />
+            <br />
+
+
+            <button ng-click="getNumberOrderVersion()" ng-disabled="Search.Order.$pristine||Search.Order.$error.minlength||Search.Order.$error.maxlength">Rechercher</button>
+            <button ng-click="reset()">Reset</button>
+        </form>
+
+        <div class="popup" dx-popup="popupOptions">
+            <div data-options="dx-popup: { title: 'selectedOrder' }">
+
+                <div class="dx-fieldset">
+                    <div class="dx-fieldset-header">{{numberOrderVersion}} version disponible</div>
+                    <p ng-if="withoutOrder">Importation de la commande {{withoutOrderMsg}}</p>
+
+                    <div id="small-indicator" dx-load-indicator="{height: 20, width: 20}" ng-if="LoadingIndicator">
+                    </div>
+
+                    <div class="dx-field" ng-if="withOrder">
+                        <div id="fieldContainer" dx-lookup="lookupOptionsVersion">
+                        </div>
+                    </div>
+
+
+                    <!-- button -->
+                    <div class="dx-field" ng-if="withOrder">
+                        <div class="dx-field-value">
+                            <div dx-button="versionButton"></div>
+                            <div dx-button="importButton"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>

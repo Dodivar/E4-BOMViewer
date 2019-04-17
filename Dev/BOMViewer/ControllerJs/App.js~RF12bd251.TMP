@@ -1,0 +1,214 @@
+﻿'use strict';
+
+var BOMViewer = angular.module('BOMViewer', ['ngRoute', 'ngStorage', 'dx']);
+
+BOMViewer
+    // Système de routage
+    .config(["$routeProvider", "$locationProvider",
+        function ($routeProvider, $locationProvider) {
+
+            /* ----- HOME -----*/
+            $routeProvider.when("/Search", {
+                templateUrl: "Search/Index"
+            });
+            /* ----- HOMME -----*/
+
+
+            /* ----- SEARCH -----*/
+            $routeProvider.when("/Search", {
+                templateUrl: "Search/Index"
+            });
+            $routeProvider.when("/Search/Index", {
+                templateUrl: "Search/Index"
+            });
+            $routeProvider.when("/Recherche", {
+                templateUrl: "Search/Recherche",
+                controller: "searchRecherche"
+            });
+            $routeProvider.when("/Default", {
+                templateUrl: "Search/Default",
+                controller: "DefaultTreeView"
+            });
+            /* ----- SEARCH -----*/
+
+
+            /* ----- CUSTOM -----*/
+            $routeProvider.when("/Custom", {
+                templateUrl: "Custom/Index"
+            });
+            $routeProvider.when("/Visualisation", {
+                templateUrl: "Custom/Visualisation",
+                controller: "customVisualisation"
+            });
+            $routeProvider.when("/Setting", {
+                templateUrl: "Custom/UserSetting",
+                controller: "customUserSetting"
+            });
+            /* ----- CUSTOM -----*/
+
+
+
+            $routeProvider.otherwise({ redirectTo: '/' });
+
+            $locationProvider.html5Mode(true).hashPrefix("!");
+        }
+    ]);
+
+
+// Au lancement de l'application
+BOMViewer.run(function ($rootScope, $http, localstorage) {
+    // Ne s'exécute seulement après les autres controlleurs..
+});
+
+BOMViewer.factory('User', ['$http', 'localstorage', function ($http, localstorage) {
+    var ID_User = 2;   
+    var color; // texte JSON de la couleur des types de ligne 
+    var colorValue; // Objet avec toutes les valeurs de couleur par nom de ligne (ex : Commande, Père, Fils...)
+    var ID_View;
+
+    return {
+        getID_User: function () {
+            return ID_User;
+        },
+        /*setID_User: function (value) {
+            ID_User = value;
+        },*/ 
+        getColor: function () {
+            return color;
+        },
+        setColor: function (value) {
+            color = value;
+        },
+
+        setID_View: function (user, view) {
+            $http({
+                url: 'Api/UpdateLastViewUsed',
+                method: 'GET',
+                params: {
+                    ID_User: user,
+                    ID_View: view
+                }
+            }).then(function (response) {
+                //console.log(response.data);                
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                };     
+
+            localstorage.set('ID_View', view)
+            ID_View = view;
+        },
+
+        getID_View: function (user) {        
+          $http({
+                url: 'Api/GetLastViewUsed',
+                method: 'GET',
+                params: {
+                    ID_User: user
+                }
+            }).then(function (response) {
+                //console.log(response.data);
+                localstorage.set('ID_View', response.data)                
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                };     
+            
+            ID_View = localstorage.get('ID_View', null)          
+            return ID_View;
+        }
+        };
+}]);
+
+BOMViewer.factory('ViewSetting', function () {
+    var listeP; // Liste principal après modification
+    var listeS; // Liste détail après modification
+    var listeDefaultP; // Liste principal lors du chargement de la vue
+    var listeDefaultS; // Liste détail lors du chargement de la vue
+    var listLine;
+    var listLineOriginal;
+    var idTypeLine;
+
+
+    return {
+        getListeP: function () {
+            return listeP;
+        },
+        getListeS: function () {
+            return listeS;
+        },
+        getListeDefaultP: function () {
+            return listeDefaultP;
+        },
+        getListeDefaultS: function () {
+            return listeDefaultS;
+        },
+        getIdTypeLine: function () {
+            return idTypeLine;
+        },
+        setListeP: function (value) {
+            listeP = value;
+        },
+        setListeS: function (value) {
+            listeS = value;
+        },
+        setListeDefaultP: function (value) {
+            listeDefaultP = value;
+        },
+        setListeDefaultS: function (value) {
+            listeDefaultS = value;
+        },
+        setIdTypeLine: function (value) {
+            idTypeLine = value;
+        },
+        setListLine: function (value) {
+            listLine = value;
+        },
+        getListLine: function () {
+            return listLine;
+        },
+        setListLineOriginal: function (value) {
+            listLineOriginal = value;
+        },
+        getListLineOriginal: function () {
+            return listLineOriginal;
+        }
+    };
+});
+
+// TODO :: Changer le titre de la page en fonction du controller
+BOMViewer.factory('PageTitle', function () {
+        var Title = 'Pagetitle';
+        return {
+            setTitle: function (newTitle) { Title = newTitle; },
+            getTitle: function () { return Title; }
+        };
+    });
+
+
+BOMViewer.factory('localstorage', ['$window', function ($window) {
+    return {
+        set: function (key, value) {
+            $window.localStorage[key] = value;
+        },
+        get: function (key, defaultValue) {
+            return $window.localStorage[key] || defaultValue || false;
+        },
+        setObject: function (key, value) {
+            $window.localStorage[key] = JSON.stringify(value); 
+        },
+        getObject: function (key, defaultValue) {
+            if ($window.localStorage[key] != undefined) {
+                return JSON.parse($window.localStorage[key]);
+            } else {
+                return defaultValue || false;
+            }
+        },
+        remove: function (key) {
+            $window.localStorage.removeItem(key);
+        },
+        clear: function () {
+            $window.localStorage.clear();
+        }
+    }
+}]);

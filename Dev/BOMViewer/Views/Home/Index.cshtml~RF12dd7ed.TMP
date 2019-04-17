@@ -1,0 +1,21 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div>
+    <h2>Accueil</h2>
+
+    <div class="dx-viewport" ng-controller="homeAccueil">
+
+        <div class="dx-fieldset">
+            <div class="dx-fieldset-header">Choix de la vue :</div>
+            <div class="dx-field" style="width:30%;">
+                <div dx-lookup="listOfView"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+

@@ -1,0 +1,72 @@
+﻿section.filter_line {
+    text-transform: uppercase;    
+    margin-left: 20px;
+}
+
+    section.filter_line div.row {       
+        height: 30px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    /* Rend thead text unselectable*/
+        section.filter_line div.row p {
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+        }
+
+        section.filter_line div.row div.tables {
+            margin-right: 15px;
+            width: 50px;
+        }
+
+            section.filter_line div.row div.tables p.table {
+                cursor: pointer;
+            }
+
+                section.filter_line div.row div.tables p.table:hover {
+                    font-weight: bold;
+                    color: #CEA54A;
+                }
+                
+        section.filter_line div.row div.lines {            
+            display: flex;
+            flex-wrap: wrap;            
+            max-height: 25px;
+        }
+    
+
+            section.filter_line div.row div.lines div.line {
+                text-align: center;
+                cursor: pointer;
+                min-width: 25px;
+                background-color: none !important;
+                margin-right: 5px;
+                padding: 0px 5px;
+                border: 1px solid #d2c8c8;
+            }
+
+                section.filter_line div.row div.lines div.line:hover {
+                    background: #CEA54A;
+                    color: white;
+                }
+
+                section.filter_line div.row div.lines div.line:active {
+                    background: red;
+                    color: white;
+                }
+
+div.selected {
+    background-color: #B92C41;
+    color: white;
+}
+
+    div.selected:hover {
+        background-color: #B92C41 !important;
+    }
+
+    div.selected:active {
+        background-color: red!important;
+    }

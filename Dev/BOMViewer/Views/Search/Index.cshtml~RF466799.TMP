@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h2>Page d'accueil N°2</h2>
+    <ul>
+        <li><a href="#/Recherche">Rechercher une commande</a></li>
+        <li><a href="#/Autre">Personnaliser la vue</a></li>
+    </ul>
+</div>
+
+<div ng-view></div>
+
+
+
+<script src="~/ControllerJs/App.js"></script>

@@ -1,0 +1,98 @@
+﻿using BOMViewer.Models;
+using IBM.Data.DB2.iSeries;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Configuration;
+using System.Web.Mvc;
+using System.Web.Routing;
+
+namespace BOMViewer.Controllers
+{
+    public class ApiController : Controller
+    {
+        private string SqlCnxStr = WebConfigurationManager.ConnectionStrings["Pro-Cfg-SqlCnxStr"].ToString();
+        private string AS400CnxStr = WebConfigurationManager.ConnectionStrings["AS400CnxStr"].ToString();
+
+        // GET: Api/...
+        [HttpGet]
+        public string GetOrderFromAs400(Recherche recherche)
+        {
+            string bib = recherche.Bibliothèque.ToUpper();
+            int commande = recherche.Commande;
+            int ligne = recherche.Ligne;
+            string tab, SQLStatement, jsonOrder = "";
+
+            // AS400 Connection
+            iDB2ConnectionStringBuilder iDB2CnxStrBuilder = new iDB2ConnectionStringBuilder { ConnectionString = AS400CnxStr };
+            AS400Manager _AS400 = new AS400Manager(iDB2CnxStrBuilder.ConnectionString);
+
+            // Base pour test toutes les bibliothèque avec des tables fixes (à améliorer)
+            if (bib == "GCFILELIB") {
+                if (ligne == 0)
+                {
+                    tab = "CDENT";
+                } else
+                    tab = "CDLGN";
+            }
+            else if (bib == "DCEXPLF") {
+                tab = "CDTEC";
+            } else
+                tab = "";
+
+
+            if (ligne >= 10) {
+                SQLStatement = "select * from " + bib + "." + tab + " where cdno$d = " + commande + " and CDLG$D = " + ligne;
+            } else
+                SQLStatement = "select * from " + bib + "." + tab + " where cdno$d = " + commande;
+            
+
+            // Get DataTable from AS400
+            DataTable ASQuery = _AS400.GetData(AS400CnxStr, SQLStatement);
+
+            // Export it to XML file
+            _AS400.ExportToXML(AS400CnxStr, SQLStatement, commande, ligne);
+
+            // Serialize JSON directly to a files
+            jsonOrder = _AS400.ConvertDataTabletoString(AS400CnxStr, SQLStatement);
+            System.IO.File.WriteAllText("c:/users/dillensegerd/desktop/BOMViewer-XML/" + commande + "_" + ligne + ".json", jsonOrder);
+
+            // Call a Stored Procedure to duplicate JSON data of order
+            SQLServerManager sql = new SQLServerManager(SqlCnxStr);
+            sql.SP_ImportOrderFromAS400(SqlCnxStr, "   ", commande, "MURPHY_CT", "GCFILELIB");
+
+            return jsonOrder;
+        }
+
+        
+        [HttpGet]
+        public string GetOrderFromDbViewer(Recherche recherche)
+        {           
+            SQLServerManager sql = new SQLServerManager(SqlCnxStr);
+            string jsonOrder = sql.ImportJsonFromDbViewer(SqlCnxStr, recherche.Commande);
+
+            return jsonOrder;
+        }
+
+
+        [HttpGet]
+        public string GetNomenclatureLines (string library, int commandNumber)
+        {
+            string tab, SQLStatement, jsonOrder = "";
+
+            // AS400 Connection
+            iDB2ConnectionStringBuilder iDB2CnxStrBuilder = new iDB2ConnectionStringBuilder { ConnectionString = AS400CnxStr };
+            AS400Manager _AS400 = new AS400Manager(iDB2CnxStrBuilder.ConnectionString);
+
+
+
+            return jsonOrder;
+
+            return res;
+        }
+
+    }
+
+}

@@ -1,0 +1,32 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div>
+    <h2>Visualisation</h2>
+    <ul>
+        <li>
+            <a href="@Url.Action("Recherche", "Home")"
+               target="_blank">
+                d'une commande
+            </a>
+        </li>        
+
+        <li>
+            <a href="@Url.Action("Recherche", "Home")"
+               target="_blank">
+                d'un panel de commande
+            </a>
+        </li>   
+        
+        <li>
+            <a href="@Url.Action("Default", "Home")"
+               target="_blank">
+                TreeView par défaut
+            </a>
+        </li>
+    </ul>
+</div>
+
+

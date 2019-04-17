@@ -1,0 +1,794 @@
+﻿'use strict';
+
+angular.module('BOMViewer')
+    .controller('customVisualisation', customVisualisation)
+    .controller('customVisualisationField', customVisualisationField)
+    .controller('customVisualisationLine', customVisualisationLine)
+    .controller('customUserSetting', customUserSetting)
+    .controller('customUserSettingColorBox', customUserSettingColorBox);
+
+
+
+// Injection des dépendances des contrôleurs
+customVisualisation.$inject = ['$scope', '$location', '$http', '$window', 'ViewSetting'];
+customVisualisationField.$inject = ['$scope', '$http', 'ViewSetting'];
+customVisualisationLine.$inject = ['$scope', '$http'];
+customUserSetting.$inject = ['$scope', '$http', 'User'];
+customUserSettingColorBox.$inject = ['$scope', '$http', '$localStorage', 'User'];
+
+
+function customVisualisation($scope, $location, $http, $window, ViewSetting) {    
+
+    console.log($window.location);
+
+    // Accordion
+    $scope.animationDuration = 300;
+    $scope.collapsible = true;
+    $scope.multiple = true;
+    $scope.selectedItems = false; // No one will be expanded by default
+    $scope.toDisplayForView = false; // Wait to click on a view to display options
+
+
+
+    // Widget de l'accordéon
+    $scope.accordionOptions = {
+        dataSource: accordionItems,
+        itemTemplate: "options",
+        bindingOptions: {
+            animationDuration: "animationDuration",
+            collapsible: "collapsible",
+            multiple: "multiple",
+            selectedItems: "selectedItems"
+        }
+    };
+
+    // Widget Bouton
+    $scope.applyButtonOptions = {
+        text: "Sauvegarder",
+        type: "success",
+        width: 150,
+        bindingOptions: {
+            disabled: '!toDisplayForView'
+        },        
+        onClick: function (e) {
+            console.log(ViewSetting.getIdTypeLine());
+            //To modifidy preference of the selected View
+            $http({
+                url: 'Api/UpdatePreferenceOfView',
+                method: 'GET',
+                params: {
+                    idView: $scope.IdViewSelected,
+                    idSubLevel: ViewSetting.getIdTypeLine(),
+                    listePrincipale: ViewSetting.getListeP(),
+                    listeSecondaire: ViewSetting.getListeS()
+                }
+            }).then(function (response) {
+                console.log(response.data);
+                console.log(response);
+                if (response.data === "True") {
+                    DevExpress.ui.notify("Configuration sauvegardée !");
+
+                }
+                else {
+                    DevExpress.ui.notify("Erreur dans la sauvegarde de la configuration ! Veuillez réessayez plus tard...");
+                }
+                    
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                DevExpress.ui.error("Erreur dans la sauvegarde de la configuration ! Veuillez réessayez plus tard...");
+            };
+        }
+    };
+    
+    $scope.cancelButtonOptions = {
+        text: "Annuler",
+        type: "danger",
+        width: 100,
+        bindingOptions: {
+            disabled: '!toDisplayForView'
+        },      
+        onClick: function (e) {
+            // On update les préférences avec celle de base lors du chargement de la vue
+            $http({ 
+                url: 'Api/UpdatePreferenceOfViewAll',
+                method: 'GET',
+                params: {
+                    idView: $scope.IdViewSelected,
+                    listePrincipale: ViewSetting.getListeDefaultP(),
+                    listeSecondaire: ViewSetting.getListeDefaultS()
+                }
+            }).then(function (response) {
+                console.log(response.data);
+                console.log(response);
+                if (response.data === "True") {
+                    DevExpress.ui.notify("Modifications annulées!");     
+
+                    $scope.selectedItemsPrincipal = ViewSetting.getListeDefaultP();
+                    $scope.selectedItemsDetail = ViewSetting.getListeDefaultS();
+                    ViewSetting.setListeP($scope.selectedItemsPrincipal);
+                    ViewSetting.setListeS($scope.selectedItemsDetail);             
+                }
+                else
+                    DevExpress.ui.notify("Erreur dans l'annulation des modifications ! Veuillez réessayez plus tard...");
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                DevExpress.ui.error("Erreur dans l'annulation des modifications ! Veuillez réessayez plus tard...");
+            };
+        }
+    };
+
+
+
+    // Affiche la liste des Views        TODO :: Ne montrer que les Vue où id_user is null / id_user est égal au sien
+    $http({
+        url: 'Api/GetViewList',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.result = response.data;
+        //console.log($scope.result);
+
+        $scope.listOfView = {
+            items: $scope.result,
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une vue",
+            displayExpr: "ViewName",
+            onItemClick: function (e) {
+                console.log(e.itemData);
+                $scope.toDisplayForView = true;
+                $scope.ViewName = e.itemData.ViewName;
+                $scope.ViewDesc = e.itemData.ViewDesc;
+                $scope.IdViewSelected = e.itemData.ID_View;
+            }
+        };
+        
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+        };
+
+}
+
+// COLUMNS LIST \\
+function customVisualisationField($scope, $http, ViewSetting) {
+
+    //TODO  :: Rafraîchir les données de la liste des types de lignes  + liste détail/arbo lorsque la sélection d'une des listes ( ligne ou table ) est changé...
+    
+    var firstTime = true;
+    $scope.listOptionsPrincipaleInstance = null;
+    $scope.listOptionsDetailInstance = null;
+
+    $scope.selectAllMode = "allPages";
+    $scope.selectionMode = "multiple";
+
+
+    // Une fois une vue sélectionnée, on charge tous ses paramètres de départ dans le cas où l'utilisateur annule ses changements, on pourra revenir en arrière grâce à ce charegement
+    GetPreferenceOfViewAll();
+
+
+    // Affiche la liste des tables 
+    $http({
+        url: 'Api/GetTableList',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.resultTable = response.data;
+
+        // List of Table
+        $scope.lookupOptionsTable = {
+            dataSource: $scope.resultTable,
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une table",
+            displayExpr: "TableName",
+            onValueChanged: function (e) {
+                $scope.SystemName = e.value.SystemName;
+                $scope.LibraryName = e.value.LibraryName;
+                $scope.TableName = e.value.TableName;
+
+                $http({
+                    url: 'Api/GetTypeLineOfTable',
+                    method: 'GET',
+                    params: {
+                        tableName: $scope.TableName
+                    }
+                }).then(function (response) {
+                    $scope.resultTypeLine = response.data;
+                    console.log($scope.resultTypeLine);
+
+                    // Widget for the List of Line type
+                    $scope.lookupOptionsLine = {
+                        dataSource: $scope.resultTypeLine,
+                        showPopupTitle: false,
+                        closeOnOutsideClick: true,
+                        placeholder: "Sélectionner un type de ligne",
+                        displayExpr: "TableSubLevelType",
+                        onValueChanged: function (e) {
+                            $scope.idLineType = e.value.ID_TableSubLevel;
+                            ViewSetting.setIdTypeLine($scope.idLineType);
+                            GetPrimaryList();
+                            console.log($scope.previousIdSubLevel);
+
+                            if (!firstTime) {
+                                $scope.previousIdSubLevel = e.previousValue.ID_TableSubLevel;
+                                UpdatePreferenceOfView(); // Nécessaire d'enregistrer car les listes dépendent du type de ligne sélectionné
+                            }
+                            else { // Dans un 1er temps, on recoit juste les pref., sinon dans un 2ième on update d'abord, puis on recoit les pref. (GetPreference imbriqué dans UpdatePref)
+                                GetPreferenceOfView();                                                       
+                            }
+                            $scope.toDisplay = true;
+                            firstTime = false;
+
+
+                            // Widget contenant la liste des paramètres pour la zone d'arboresence
+                            $scope.listOptionsPrincipale = {
+                                height: 650,
+                                keyExpr: "key",
+                                bindingOptions: {
+                                    selectionMode: "selectionMode",
+                                    selectAllMode: "selectAllMode",
+                                    dataSource: "primaryList",
+                                    selectedItemKeys: "selectedItemsPrincipal"
+                                },
+                                allowItemReordering: true,
+                                showSelectionControls: true,
+                                searchEnabled: true,
+                                searchMode: "contains",
+                                searchExpr: ['ColumnName', 'ColumnDesc'],
+                                onContentReady: function (e) { // Met au début de la liste tous les champs sélectionnés de base
+                                    $scope.listOptionsPrincipaleInstance = e.component;
+                                },
+                                onItemClick: function (item) {
+                                    ViewSetting.setListeP($scope.selectedItemsPrincipal);
+                                },
+                                onItemReordered: function (e) {
+                                    // Besoin de le re-seléctionner une fois bouger car sinon la liste ne prend pas en compte sa position
+                                    if ($scope.listOptionsPrincipaleInstance.isItemSelected(e.toIndex)) {
+                                        $scope.listOptionsPrincipaleInstance.unselectItem(e.toIndex);
+                                        $scope.listOptionsPrincipaleInstance.selectItem(e.toIndex);
+                                    }
+                                    ViewSetting.setListeP($scope.selectedItemsPrincipal);
+                                    $scope.listOptionsPrincipaleInstance.repaint();
+                                }
+                            };
+
+                            // Widget contenant la liste des paramètres pour la zone de détail
+                            $scope.listOptionsSecondaire = {
+                                height: 650,
+                                keyExpr: "key",
+                                bindingOptions: {
+                                    selectionMode: "selectionMode",
+                                    selectAllMode: "selectAllMode",
+                                    dataSource: "primaryList",
+                                    selectedItemKeys: "selectedItemsDetail"
+                                },
+                                allowItemReordering: true,
+                                showSelectionControls: true,
+                                searchEnabled: true,
+                                searchMode: "contains",
+                                searchExpr: ['ColumnName', 'ColumnDesc'],
+                                onContentReady: function (e) { // Met au début de la liste tous les champs sélectionnés de base
+                                    $scope.listOptionsDetailInstance = e.component;
+                                },
+                                onItemClick: function (item) {
+                                    ViewSetting.setListeS($scope.selectedItemsDetail);
+                                },
+                                onItemReordered: function (e) {
+                                    if ($scope.listOptionsDetailInstance.isItemSelected(e.toIndex)) {
+                                        $scope.listOptionsDetailInstance.unselectItem(e.toIndex);
+                                        $scope.listOptionsDetailInstance.selectItem(e.toIndex);
+                                    }
+                                    ViewSetting.setListeS($scope.selectedItemsDetail);
+                                    $scope.listOptionsDetailInstance.repaint();
+                                }
+                            };
+                        }
+                    };
+                }), function (response) {
+                    console.log(response);
+                    alert(reponse);
+                };
+            }
+        };
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };
+
+
+
+
+    function GetPrimaryList() {
+        $http({
+            url: 'Api/GetPrimaryListOptions',
+            method: 'GET',
+            params: {
+                system: $scope.SystemName,
+                library: $scope.LibraryName,
+                table: $scope.TableName,
+                line: $scope.idLineType
+            }
+        }).then(function (response) {
+            $scope.primaryList = response.data;
+
+        }), function (response) {
+            console.log(response);
+            alert(reponse);
+        };
+    }
+
+    // Cette fonction prend les enregistrements concernant la vue en fonction du type de ligne sélectionné
+    function GetPreferenceOfView() {
+        $http({
+            url: 'Api/GetPreferenceOfView',
+            method: 'GET',
+            params: {
+                idView: $scope.IdViewSelected,
+                idSubLevel: $scope.idLineType
+            }
+        }).then(function (response) {
+            var listeP = [];
+            var listeS = [];
+            var i = 0;
+            while (i !== response.data.length) {
+                if (response.data[i].DetailLevel === 0) {
+                    listeP.push(response.data[i].key); // KEY = ID_Column + _ + ID_TableSubLevel
+                }
+                else {
+                    listeS.push(response.data[i].key);
+                }
+                i++;
+            }
+
+            // Permet de créer une liste identifiant la colonne pour le type de ligne à pré-cocher lors de l'affichage des choix de zone de la vue
+            $scope.selectedItemsPrincipal = listeP;
+            $scope.selectedItemsDetail = listeS;
+            ViewSetting.setListeP($scope.selectedItemsPrincipal);
+            ViewSetting.setListeS($scope.selectedItemsDetail);
+            console.log($scope.selectedItemsPrincipal);
+            console.log($scope.selectedItemsDetail);
+
+        }), function (response) {
+            console.log(response);
+        };
+    }
+
+    // Cette fonction prend tous les enregistrements concernant la vue pour une éventuelle remise à 0 (annulation des changements)
+    function GetPreferenceOfViewAll() {
+        $http({
+            url: 'Api/GetPreferenceOfViewAll',
+            method: 'GET',
+            params: {
+                idView: $scope.IdViewSelected
+            }
+        }).then(function (response) {
+            var listeP = [];
+            var listeS = [];
+            var i = 0;
+            while (i !== response.data.length) {
+                if (response.data[i].DetailLevel === 0) {
+                    listeP.push(response.data[i].key); // KEY = ID_Column + _ + ID_TableSubLevel
+                }
+
+                else {
+                    listeS.push(response.data[i].key);
+                }
+                i++;
+            }            
+            ViewSetting.setListeDefaultP(listeP);
+            ViewSetting.setListeDefaultS(listeS);
+            //console.log(ViewSetting.getListeDefaultP());
+            //console.log(ViewSetting.getListeDefaultS());
+        }), function (response) {
+            console.log(response);
+        };
+    }
+
+    function UpdatePreferenceOfView() {
+        //console.log(ViewSetting.getListeP());
+        //console.log(ViewSetting.getListeS());
+
+        $http({
+            url: 'Api/UpdatePreferenceOfView',
+            method: 'GET',
+            params: {
+                idView: $scope.IdViewSelected,
+                idSubLevel: $scope.previousIdSubLevel,
+                listePrincipale: ViewSetting.getListeP(),
+                listeSecondaire: ViewSetting.getListeS()
+            }
+        }).then(function (response) {
+            console.log(response.data);
+            console.log($scope.previousIdSubLevel);
+
+            // On appelle cette fonction car il faut d'abord enregistrer les pref., puis les recevoir car si on enchaîne les deux dans la requête HTTP, Angularjs traitera le GetPreferenceOfView avant de sauvegarder (Update)
+            GetPreferenceOfView();
+
+        }), function (response) {
+            console.log(response);
+            alert(reponse);
+        };
+    }
+
+    function UpdatePreferenceOfViewAll() {
+       //console.log(ViewSetting.getListeP());
+       //console.log(ViewSetting.getListeS());
+
+        $http({
+            url: 'Api/UpdatePreferenceOfViewAll',
+            method: 'GET',
+            params: {
+                idView: $scope.IdViewSelected,
+                listePrincipale: ViewSetting.getListeP(),
+                listeSecondaire: ViewSetting.getListeS()
+            }
+        }).then(function (response) {
+            console.log(response.data);
+
+        }), function (response) {
+            console.log(response);
+            alert(reponse);
+        };
+    }
+}
+
+// Type LINE FILTER \\ TODO
+function customVisualisationLine($scope, $http) {
+
+
+    // Charge la liste des types de lignes de toutes les tables
+    $http({
+        url: 'Api/GetTableSubLevels',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.resultLine = response.data;
+        console.log($scope.resultLine);
+
+        // Widget de l'accordéon
+        $scope.accordionOptionsLine = {
+            dataSource: $scope.resultLine,
+            itemTemplate: "object",
+            bindingOptions: {
+                animationDuration: 300,
+                collapsible: true,
+                multiple: true,
+                selectedItems: $scope.resultLine[0]
+            }
+        };
+
+    }), function (response) {
+        console.log(response);
+        alert("Erreur lors du chargement de la liste des types de lignes...");
+        };
+}
+
+
+
+function customUserSetting($scope, $http, User) {
+}
+
+function customUserSettingColorBox($scope, $http, $localStorage, User) {
+
+    $scope.bool = false;
+
+    var applyButton = "Valider";
+    var cancelButton = "Annuler";
+    var tmp; // For checkbox text
+
+    
+    $scope.$storage = $localStorage.$default({
+        bool: false
+    });
+    console.log($scope.$storage.bool);
+
+    if ($scope.$storage.bool) {
+        tmp = "désactiver";
+    } else tmp = "activer";
+
+    $scope.checkBox = {
+        forAlphaChannel: {
+            bindingOptions: {
+                value: $scope.$storage.bool
+            },
+            text: "Cliquer pour " + tmp + " la transparence",
+            value: $scope.$storage.bool
+        }
+    };
+
+    $scope.reload = function ($location) {
+        $scope.$storage.bool = !$scope.$storage.bool;
+        console.log($scope.$storage.bool);
+        location.replace('Custom/UserSetting');
+    };
+
+
+    $http({
+        url: 'Api/GetUserColorSetting',
+        method: 'GET',
+        params: {
+            ID_User: User.getID_User()
+        }
+    }).then(function (response) {
+        $scope.UserColorSetting = response.data;
+        console.log($scope.UserColorSetting);
+        User.setColor($scope.UserColorSetting);   
+
+        $scope.colorValue = {
+            Commande: User.getColor()[0].Color,
+            Ligne: User.getColor()[1].Color,
+            Pere: User.getColor()[2].Color,
+            Fils: User.getColor()[3].Color,
+            Virtuelle: User.getColor()[4].Color,
+            Usinage: User.getColor()[5].Color,
+            EtapeUsi: User.getColor()[6].Color,
+            MatiereGen: User.getColor()[7].Color,
+            IPM: User.getColor()[8].Color,
+            Fabrication: User.getColor()[9].Color,
+            GammeOpe: User.getColor()[10].Color,
+            PDC: User.getColor()[11].Color,
+            InfosProcPDC: User.getColor()[12].Color,
+            LigneColis: User.getColor()[13].Color
+        };
+        User.setColorValue($scope.colorValue);
+       
+        $scope.colorBox = {
+            Commande: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.Commande"
+                },
+                applyValueMode: "instantly",
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Commande (O)",
+                lib: "Commande"
+
+            },
+            Ligne: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.Ligne"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Ligne (A)",
+                lib: "Ligne"
+            },
+            Pere: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.Pere"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Père (P)",
+                lib: "Pere"
+            },
+            Fils: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.Fils"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Nomenclature Fils (N)",
+                lib: "Fils"
+            },
+            Virtuelle: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.Virtuelle"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Virtuelle (V)",
+                lib: "Virtuelle"
+            },
+            Usinage: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.Usinage"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Usinage (U)",
+                lib: "Usinage"
+            },
+            EtapeUsi: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.EtapeUsi"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Etape Usinage (S)",
+                lib: "EtapeUsi"
+            },
+            MatiereGen: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.MatiereGen"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Matière générée (G)",
+                lib: "MatiereGen"
+            },
+            IPM: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.IPM"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Infos Processus Matière (I)",
+                lib: "IPM"
+            },
+            Fabrication: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.Fabrication"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Fabrication (F)",
+                lib: "Fabrication"
+            },
+            GammeOpe: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.GammeOpe"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Gamme d'opération (O)",
+                lib: "GammeOpe"
+            },
+            PDC: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.PDC"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Poste De Charge (W)",
+                lib: "PDC"
+            },
+            InfosProcPDC: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.InfosProcPDC"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Infos Processus PDC (Ip)",
+                lib: "InfosProcPDC"
+            },
+            LigneColis: {
+                applyValueMode: "instantly",
+                bindingOptions: {
+                    value: "colorValue.LigneColis"
+                },
+                applyButtonText: applyButton,
+                cancelButtonText: cancelButton,
+                editAlphaChannel: $scope.$storage.bool,
+                text: "Ligne colis (L)",
+                lib: "LigneColis"
+            }
+        };
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };
+    
+
+
+
+    $scope.applyButton = {
+        text: "Sauvegarder",
+        type: "success",
+        width: 150,
+        onClick: function (e) {
+
+            console.log($scope.colorValue.length());
+            console.log($scope.colorValue.count());
+
+            $scope.colorValueList = "C=" + $scope.colorValue.Commande + ";A=" + $scope.colorValue.Ligne + ";P=" + $scope.colorValue.Pere + ";N="
+                + $scope.colorValue.Fils + ";V=" + $scope.colorValue.Virtuelle + ";U=" + $scope.colorValue.Usinage + ";S="
+                + $scope.colorValue.EtapeUsi + ";G=" + $scope.colorValue.MatiereGen + ";I=" + $scope.colorValue.IPM + ";F="
+                + $scope.colorValue.Fabrication + ";O=" + $scope.colorValue.GammeOpe + ";W=" + $scope.colorValue.PDC + ";Ip="
+                + $scope.colorValue.InfosProcPDC + ";L=" + $scope.colorValue.LigneColis;
+            //console.log($scope.colorValueList);            
+            $http({
+                url: 'Api/UpdateUserColorSetting',
+                method: 'GET',
+                params: {
+                    ID_User: User.getID_User(),
+                    ColorValueList: $scope.colorValueList
+                }
+            }).then(function (response) {
+                console.log(response.data);
+                DevExpress.ui.notify("Configuration Sauvegardée !");
+               
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                DevExpress.ui.error("Erreur dans la sauvegarde de la configuration ! Veuillez réessayez plus tard...");
+            };
+        }
+    };
+
+    $scope.cancelButton = {
+        text: "Annuler",
+        type: "danger",
+        width: 100,
+        onClick: function (e) {
+                
+        $scope.colorValue = {
+            Commande: User.getColor()[0].Color,
+            Ligne: User.getColor()[1].Color,
+            Pere: User.getColor()[2].Color,
+            Fils: User.getColor()[3].Color,
+            Virtuelle: User.getColor()[4].Color,
+            Usinage: User.getColor()[5].Color,
+            EtapeUsi: User.getColor()[6].Color,
+            MatiereGen: User.getColor()[7].Color,
+            IPM: User.getColor()[8].Color,
+            Fabrication: User.getColor()[9].Color,
+            GammeOpe: User.getColor()[10].Color,
+            PDC: User.getColor()[11].Color,
+            InfosProcPDC: User.getColor()[12].Color,
+            LigneColis: User.getColor()[13].Color
+        };
+/*
+            // On update les préférences avec celle de base lors du chargement de la vue
+            $http({
+                url: 'Api/UpdatePreferenceOfViewAll',
+                method: 'GET',
+                params: {
+                    idView: $scope.IdViewSelected,
+                    listePrincipale: User.getListeDefaultP(),
+                    listeSecondaire: User.getListeDefaultS()
+                }
+            }).then(function (response) {
+                console.log(response.data);
+                console.log(response);
+                if (response.data === "True") {
+                    DevExpress.ui.notify("Modification annulé !");
+
+                    $scope.selectedItemsPrincipal = User.getListeDefaultP();
+                    $scope.selectedItemsDetail = User.getListeDefaultS();
+                    User.setListeP($scope.selectedItemsPrincipal);
+                    User.setListeS($scope.selectedItemsDetail);
+                }
+                else
+                    DevExpress.ui.notify("Erreur dans l'annulation des modifications ! Veuillez réessayez plus tard...");
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                DevExpress.ui.error("Erreur dans l'annulation des modifications ! Veuillez réessayez plus tard...");
+            };*/
+        }
+    };
+
+}
+

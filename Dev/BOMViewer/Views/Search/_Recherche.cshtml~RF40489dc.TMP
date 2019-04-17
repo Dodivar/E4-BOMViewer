@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="title col-sm-12">
+    <h1>Recherche d'une commande</h1>
+</div>
+<hr />
+
+<div ng-controller="searchRecherche" ng-init="getUserColor()" ng-cloak>
+
+    <div id="pie-chart-top-order" dx-pie-chart="chartOptions" style="width:40%; float:right;"></div>
+
+    <div class="dx-fieldset">
+        <form ng-submit="searchOrder()" style="width:50%;">
+            <div id="form-container">
+                <div id="form" dx-form="formOptions"></div>
+            </div>
+        </form>
+
+        <br />
+        <hr />
+        <div class="dx-field" style="width:50%">
+            <div class="dx-field-label">Dernière commande recherchée : </div>
+            <div class="dx-field-value">
+                <div dx-button="orderButtonOptions"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="popup" dx-popup="popupOptions">
+        <div data-options="dx-popup: { title: 'selectedOrder' }">
+
+            <div class="dx-fieldset">
+                <div class="dx-fieldset-header">{{numberOrderVersion}} version disponible</div>
+                <p>{{withoutOrderMsg}}</p>
+
+                <div id="progress">
+                    <div id="progressBarStatus" dx-progress-bar="progressBarOptions"></div>
+                </div>
+
+                <hr />
+
+                <div dx-button="cancelButton" style="float:right;"></div>
+
+
+
+                <div id="small-indicator" dx-load-indicator="{height: 20, width: 20}" ng-if="forLoadIndicator"></div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--
+                        <div class="dx-field" ng-if="withOrder">
+        <div id="fieldContainer" dx-lookup="lookupOptionsVersion"></div>
+    </div>
+
+
+    <div class="dx-fieldset" ng-if="withOrder">
+        <div class="dx-field">
+            <div dx-button="importButton"></div>
+            <div dx-button="versionButton" style="float:right;"></div>
+        </div>
+
+    </div>
+     -->

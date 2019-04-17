@@ -1,0 +1,289 @@
+﻿'use strict';
+
+angular.module('BOMViewer')
+    .controller('CustomUserSetting', CustomUserSetting)
+    .controller('CustomUserSettingColorBox', CustomUserSettingColorBox);
+
+CustomUserSetting.$inject = ['$scope', '$location', '$http'];
+CustomUserSettingColorBox.$inject = ['$scope', '$location', '$localStorage', '$http', 'User'];
+
+
+function CustomUserSetting($scope, $location, $http) {
+
+    // Widget Bouton
+    $scope.applyButtonOptions = {
+        text: "Sauvegarder",
+        type: "success",
+        width: 150,       
+        onClick: function (e) {
+        }
+    };
+
+    $scope.cancelButtonOptions = {
+        text: "Annuler",
+        type: "danger",
+        width: 100,        
+        onClick: function (e) {           
+        }
+    };
+}
+
+
+// COLOR BOX \\        
+function CustomUserSettingColorBox($scope, $location, $localStorage, $http, User) {
+
+    
+    $scope.$storage = $localStorage.$default({
+        bool: false
+    });
+    console.log($scope.$storage.bool);
+
+    $scope.bool = false;
+
+    var applyButton = "Valider";
+    var cancelButton = "Annuler";
+
+
+
+    $http({
+        url: 'Api/GetUserColorSetting', //TODO !!
+        method: 'GET',
+        params: {
+            ID_User: User.getID_User()
+        }
+    }).then(function (response) {
+        $scope.result = response.data;        
+        console.log($scope.result);
+        User.setColor($scope.result);
+        console.log(User.getColor());
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };
+
+    $scope.ColorValue = {
+        Commande: User.getColor[0],
+        Ligne: User.getColor[1],
+        Pere: User.getColor[2],
+        Fils: User.getColor[3],
+        Virtuelle: User.getColor[4],
+        Usinage: User.getColor[5],
+        EtapeUsi: User.getColor[6],
+        MatiereGen: User.getColor[7],
+        IPM: User.getColor[8],
+        Fabrication: User.getColor[9],
+        GammeOpe: User.getColor[10],
+        PDC: User.getColor[11],
+        InfpsProcPDC: User.getColor[12],
+        LigneColis: User.getColor[13],
+    };
+
+    User.setColorValue($scope.ColorValue);
+
+
+    $scope.colorBox = {
+        Commande: {
+            value: $scope.ColorValue.Commande,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Commande",
+            lib: "Commande"
+        },
+        Ligne: {
+            value: $scope.ColorValue.Ligne,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "N° de Ligne",
+            lib: "Ligne"
+        },
+        Pere: {
+            value: $scope.ColorValue.Pere,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Père (P)",
+            lib: "Pere"
+        },
+        NomenclatureFils: {
+            value: $scope.ColorValue.Fils,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Nomenclature Fils (N)",
+            lib: "NomenclatureFils"
+        },
+        Virtuelle: {
+            value: $scope.ColorValue.Virtuelle,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Virtuelle (V)",
+            lib: "Virtuelle"
+        },
+        Usinage: {
+            value: $scope.ColorValue.Usinage,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Usinage (U)",
+            lib: "Usinage"
+        },
+        EtapeUsi: {
+            value: $scope.ColorValue.EtapeUsi,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Etape Usinage (S)",
+            lib: "EtapeUsi"
+        },
+        MatiereGen: {
+            value: $scope.ColorValue.MatiereGen,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Matière générée (G)",
+            lib: "MatiereGen"
+        },
+        IPM: {
+            value: $scope.ColorValue.IPM,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Infos Processus Matière (Ip)",
+            lib: "IPM"
+        },
+        Fabrication: {
+            value: $scope.ColorValue.Fabrication,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Fabrication (F)",
+            lib: "Fabrication"
+        },
+        GammeOpe: {
+            value: $scope.ColorValue.GammeOpe,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Gamme d'opération (O)",
+            lib: "GammeOpe"
+        },
+        PDC: {
+            value: $scope.ColorValue.PDC,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Poste De Charge (W)",
+            lib: "PDC"
+        },
+        InfosProcPDC: {
+            value: $scope.ColorValue.InfosProcPDC,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Infos Processus PDC (I)",
+            lib: "InfosProcPDC"
+        },
+        LigneColis: {
+            value: $scope.ColorValue.LigneColis,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Ligne colis (L)",
+            lib: "LigneColis"
+        }
+    };
+
+    
+    var tmp; // For checkbox text
+    if ($scope.$storage.bool) {
+        tmp = "désactiver";
+    } else tmp = "activer";
+    
+
+    
+    // To enable "editAlphaChannel" for colorBox
+    $scope.checkBox = {
+        forAlphaChannel: {
+            bindingOptions: {
+                value: $scope.$storage.bool
+            },
+            text: "Cliquer pour " + tmp + " la transparence",
+            value: $scope.$storage.bool
+        }
+    };
+
+
+    $scope.reload = function ($location) {
+        $scope.$storage.bool = !$scope.$storage.bool;
+        console.log($scope.$storage.bool);
+        location.replace('Custom/UserSetting');
+    };
+
+
+
+
+
+
+
+    // Widget Bouton
+    $scope.applyButtonOptions = {
+        text: "Sauvegarder",
+        type: "success",
+        width: 150,
+        onClick: function (e) {
+            //console.log(ViewSetting.getIdTypeLine());
+            if (ViewSetting.getIdTypeLine() != null) {
+                //To UPDATE Column of the view
+                $http({
+                    url: 'Api/UpdatePreferenceColumnOfView',
+                    method: 'GET',
+                    params: {
+                        idView: $scope.IdViewSelected,
+                        idSubLevel: ViewSetting.getIdTypeLine(),
+                        listePrincipale: ViewSetting.getListeP(),
+                        listeSecondaire: ViewSetting.getListeS()
+                    }
+                }).then(function (response) {
+                    //console.log(response.data);                
+
+                }), function (response) {
+                };
+            }
+
+
+
+
+    };
+
+    $scope.cancelButtonOptions = {
+        text: "Annuler",
+        type: "danger",
+        width: 100,
+        onClick: function (e) {
+            // On update les préférences des colonnes avec celle de base lors du chargement de la vue
+            $http({
+                url: 'Api/UpdatePreferenceColumnOfViewAll',
+                method: 'GET',
+                params: {
+                    idView: $scope.IdViewSelected,
+                    listePrincipale: ViewSetting.getListeDefaultP(),
+                    listeSecondaire: ViewSetting.getListeDefaultS()
+                }
+            }).then(function (response) {
+                console.log(response.data);
+              
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                DevExpress.ui.error("Erreur dans l'annulation des modifications ! Veuillez réessayez plus tard...");
+            };
+
+        }
+    };
+
+}

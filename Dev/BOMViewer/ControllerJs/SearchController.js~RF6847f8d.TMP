@@ -1,0 +1,888 @@
+﻿'use strict';
+
+var BOMViewer = angular.module('BOMViewer');
+BOMViewer
+    .controller('searchRecherche', searchRecherche)
+    .controller('searchTreeView', searchTreeView);    
+
+// Injection des dépendances des contrôleurs
+searchRecherche.$inject = ['$scope', '$http', '$window', '$routeParams', 'localstorage', 'User', 'Order'];
+searchTreeView.$inject = ['$scope', '$http', '$window', 'localstorage', 'User', 'Order'];
+
+
+
+// FORM \\
+function searchRecherche($scope, $http, $window, $routeParams, localstorage, User, Order) {
+
+    var Agency = [
+        { id: '1', Age: '   ', Lib: 'FRA' },
+        { id: '2', Age: '100', Lib: 'ALL' },
+        { id: '3', Age: '200', Lib: 'ESP' }];
+
+    var Library = [
+        { id: '1', Lib: 'GCFILELIB' },
+        { id: '2', Lib: 'DCEXPLF' },
+        { id: '3', Lib: 'HISTOTEC' }];
+
+    var OrderData = {
+        IdOrder: 0,
+        OrderNumber: 0,
+        Library: '',
+        Agency: '',
+        AgencyText: '',
+        Line: 0,
+        Version: 0
+    }
+
+    /* Test with URL params  */
+    var agence = $routeParams.agence;
+    var order = $routeParams.order;
+    var bib = $routeParams.bib;
+    console.log(agence, order, bib);
+
+
+    $scope.disableButton = true;
+    $scope.selectedAgency = Agency[0]; // default agency is selected on FRA    
+    $scope.selectedLibrary = Library[0];
+
+    $http({
+        url: 'Api/GetLastOrderDisplayed',
+        method: 'GET',
+        params: {
+            ID_User: User.getID_User()
+        }
+    }).then(function (response) {
+        $scope.lastOrderView = response.data[0];
+        //console.log($scope.lastOrderView.OrderAgence);
+
+        if ($scope.lastOrderView.OrderAgence === '') {
+            $scope.lastOrderViewTOrderAgenceTMP = Agency[0].Lib;
+        }
+        else {
+            for (var i = 1; i < Agency.length -1; i++) {
+                //console.log(i);
+                if ($scope.lastOrderView.OrderAgence === Agency[i].Age) {
+                    $scope.lastOrderViewTOrderAgenceTMP = Agency[i].Lib;
+                    //console.log(Agency[i].Lib);                    
+                }
+            }        
+        }       
+        //console.log($scope.lastOrderView.OrderLine);
+        if ($scope.lastOrderView.OrderLine === 0)
+            $scope.lastOrderViewId = $scope.lastOrderView.OrderNumber + ' - ' + $scope.lastOrderViewTOrderAgenceTMP;            
+        else
+            $scope.lastOrderViewId = $scope.lastOrderView.OrderNumber + ' - ' + $scope.lastOrderViewTOrderAgenceTMP + ' (' + $scope.selectedLine + ')';
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };
+
+    // WIDGET Radio group button
+    $scope.radioGroupAgency = {
+        items: Agency,
+        bindingOptions: {
+            value: "selectedAgency"
+        },            
+        displayExpr: "Lib",
+        layout: "horizontal"
+    };
+
+    // WIDGET Radio group button
+    $scope.radioGroupLibrary = {
+        items: Library,         
+        bindingOptions: {
+            value: "selectedLibrary"
+        },      
+        displayExpr: "Lib",
+        layout: "horizontal"
+    };
+
+    // WIDGET Text box for order
+    $scope.textBoxOrder = {
+        placeholder: "N° de commande",
+        showClearButton: true,
+        /*mask: "000000000",
+        showMaskMode: "onFocus",
+        maskInvalidMessage: "Format du N° de commande invalide",*/
+        maxLength: 9,
+        onEnterKey: function (e) {
+            getNumberOrderVersion($scope.selectedAgency.Age, $scope.selectedOrder);
+        } 
+        
+    };
+
+    // WIDGET Text box for line
+    $scope.textBoxLine = {
+        placeholder: "N° de ligne",
+        showClearButton: true,                
+        onEnterKey: function (e) {
+            getNumberOrderVersion($scope.selectedAgency.Age, $scope.selectedOrder);
+        } 
+    };
+
+    // WIDGET Bouton success
+    $scope.applyButtonOptions = {
+        bindingOptions: {
+          //  disabled: "disableButton"
+        },   
+        text: "Rechercher",
+        type: "success",
+        width: 200,
+        accessKey: "Enter",
+        onClick: function (e) {
+            if($scope.selectedOrder != null)
+                getNumberOrderVersion($scope.selectedAgency.Age, $scope.selectedOrder);          
+            else 
+                DevExpress.ui.notify('Veuillez indiquer le numéro de commande', "error", 1000)
+        }
+    };
+
+    // WIDEGT For last Order display in button
+    $scope.orderButtonOptions = {
+        bindingOptions: {
+            text: 'lastOrderViewId' //'lastOrderView.OrderNumber' + 'lastOrderView.OrderAgence' + '(lastOrderView.selectedLine)'
+        },
+        type: "default",
+        width: 200,
+        onClick: function (e) {            
+            getNumberOrderVersion($scope.lastOrderView.OrderAgence, $scope.lastOrderView.OrderNumber);
+        }
+    };
+
+     // WIDGET Bouton cancel
+    $scope.cancelButtonOptions = {
+        text: "Annuler",
+        type: "danger",
+        width: 150,
+        onClick: function (e) {
+            reset();
+        }
+    };
+
+
+    var reset = function () {
+        $scope.selectedOrder = angular.copy('');
+        $scope.selectedLine = angular.copy('');
+    };
+
+
+    var getNumberOrderVersion = function (agence, order) { 
+        console.log(agence, '|', order, '|', $scope.selectedLine);
+        $http({
+            url: 'Api/GetNumberOrderVersion',
+            method: 'GET',
+            params: {
+                OrderAgence: agence,
+                OrderNumber: order              
+            }
+        }).then(function (response) {            
+            $scope.numberOrderVersion = response.data.length;
+            $scope.allNumberOrderVersion = response.data;
+            $scope.popup = true;
+            $scope.withOrder = false;
+            $scope.withoutOrder = false; 
+            $scope.titleForPopUp = "Commande : " + order;
+            //console.log($scope.allNumberOrderVersion);
+
+            $scope.toTreeViewAgence = agence;
+            $scope.toTreeViewOrder = order;           
+
+            if ($scope.numberOrderVersion == 0) {
+                $scope.withoutOrder = true; 
+                $scope.forLoadIndicator = true;
+                $scope.withoutOrderMsg = "en cours...";
+                $scope.ImportOrderLineFromAS400(agence, order, $scope.selectedLine);                    
+
+            }
+            else {      
+                $scope.allNumberOrderVersion.reverse();
+                $scope.withOrder = true;
+                $scope.forLoadIndicator = false;
+                
+                // TODO :: Si une ligne spécifique est sélectionné d'une version, n'afficher que celle-ci
+            }
+        });
+    };
+
+    // WIDGET Pop-Up
+    $scope.popupOptions = {
+        width: 500,
+        height: 300,
+        showTitle: true,
+        closeOnOutsideClick: true,
+        bindingOptions: {
+            visible: "popup",
+            title: "titleForPopUp"
+        }
+    };
+
+    // WIDGET List Version Pop-up
+    $scope.lookupOptionsVersion = {
+        bindingOptions: {
+            dataSource: "allNumberOrderVersion",
+            value: 'allNumberOrderVersion[0]',
+            visible: "withOrder"           
+        },
+        popupHeight: 700,
+        popupWidth: 250,
+        showPopupTitle: true,
+        closeOnOutsideClick: true,
+        placeholder: "Sélectionner un numéro de version",
+        displayExpr: "OrderVersion",
+        onInitialized: function () {
+            $scope.orderVersionSelected = $scope.allNumberOrderVersion[0].OrderVersion
+            //console.log($scope.orderVersionSelected)
+        },
+        onItemClick: function (item) {
+            $scope.orderVersionSelected = item.itemData.OrderVersion
+        }
+    };
+
+    // WIDGET Button Pop-up
+    $scope.versionButton = {
+        text: "Ok",
+        type: "success",
+        width: 170,
+        bindingOptions: {
+            visible: "withOrder"
+        },
+        onClick: function (e) {
+            $http({
+                url: 'Api/GetSpecifiedOrderVersion',
+                method: 'GET',
+                params: {
+                    OrderAgence: $scope.toTreeViewAgence,
+                    OrderNumber: $scope.toTreeViewOrder,
+                    OrderVersion: $scope.orderVersionSelected,
+                    ID_View: 3
+                }
+            }).then(function (response) {
+                $scope.IdOrderNumber = response.data;
+
+                OrderData = {
+                    IdOrder: $scope.IdOrderNumber,
+                    OrderNumber: $scope.toTreeViewOrder,
+                    Library: $scope.selectedLibrary.Lib,
+                    Agency: $scope.toTreeViewAgence,
+                    AgencyText: '',
+                    Line: $scope.selectedLine,
+                    Version: $scope.orderVersionSelected
+                }
+                //console.log($scope.OrderData);
+
+                $scope.SendToTreeView(OrderData);
+            });
+        }
+    };
+
+    // WIDGET Button Pop-up
+    $scope.importButton = {
+        text: 'Importer à nouveau',
+        type: 'normal',
+        width: 170,
+        onClick: function (e) {           
+            //need to display the loading round !
+            $scope.forLoadIndicator = true;
+            $scope.ImportOrderLineFromAS400($scope.toTreeViewAgence, $scope.toTreeViewOrder, $scope.selectedLine);
+        }
+    };
+    
+    $scope.ImportOrderLineFromAS400 = function (agence, order, line) {
+        // If line don't specified, line = 0 when it send to API
+        $http({
+            url: 'Api/ImportOrderLineFromAS400',
+            method: 'GET',
+            params: {
+                Library: $scope.selectedLibrary.Lib,
+                Agency: agence,
+                Order: order,
+                Line: line
+            }
+        }).then(function (response) {
+            $scope.IdOrderNumber = response.data;
+            
+            if (isNaN($scope.IdOrderNumber)) {
+                DevExpress.ui.notify('Aucune commande trouvée ! [' + order + '] - [' + agence + '] (' + $scope.selectedLibrary.Lib + ')', "error", 3000);
+                $scope.popup = false;
+            }
+            else {
+                OrderData = {
+                    IdOrder: $scope.IdOrderNumber,
+                    OrderNumber: order,
+                    Library: $scope.selectedLibrary.Lib,
+                    Agency: agence,
+                    AgencyText: '',
+                    Line: line,
+                    Version: 1
+            }
+            $scope.import = true; // To display another texte on pop-up 
+            $scope.forLoadIndicator = false;
+            $scope.withoutOrderMsg = "effectué !";
+            $scope.SendToTreeView(OrderData);
+            }
+        }), function (response) {
+            console.log(response);
+            alert(reponse);
+        };
+    };
+    
+    $scope.updateLastOrderDisplay = function (orderAgency, orderNumber, orderLine) {
+        //console.log(agence, '|', orderNumber);
+        $http({
+            url: 'Api/UpdateLastOrderDisplayed',
+            method: 'GET',
+            params: {
+                ID_User: User.getID_User(),
+                ID_Order: orderNumber,
+                OrderAgence: orderAgency,
+                OrderLine: orderLine
+            }
+        }).then(function (response) {
+            //console.log(response.data);
+            $scope.lastOrderView.OrderNumber = orderNumber;
+            $scope.lastOrderView.OrderAgence = orderAgency;
+            $scope.lastOrderView.OrderLine = orderLine;
+        }), function (response) {
+            console.log(response);
+            alert(reponse);
+        };
+    }   
+    
+    $scope.SendToTreeView = function (OrderData) {  
+        //console.log('agence [', agenceSelected, '] commande [', orderSelected, ']');
+        User.getColor(User.getID_User()); // On charge les préférences couleurs        
+        $scope.updateLastOrderDisplay(OrderData.Agency, OrderData.OrderNumber); // On sauvegarde la dernière commmande recherchée
+        Order.sendToTreeView(OrderData); // On envoie les donées sur une autre page dédié au TV                 
+    }
+
+
+    
+}
+
+// TREEVIEW \\
+function searchTreeView($scope, $http, $window, localstorage, User, Order) {  
+
+    $scope.OrderData = {
+        IdOrder: window.IdOrderNumber,
+        OrderNumber: window.selectedOrder,
+        Library: window.Library,
+        Agency: window.AgencyNumber,
+        AgencyText: window.AgencyText,
+        Line: window.Line,
+        Version: window.Version
+    }
+    //console.log($scope.OrderData);
+
+    // On stock les préférences couleurs
+    var colorObj = localstorage.getObject('colorValue', "colorValue erreur");
+    //console.log(colorObj);
+
+    $scope.TVerror = "";
+    $scope.toolTipOfNodeText = "";
+    $scope.toolTipElement = "";
+    $scope.TreeViewOptionsPrincipaleInstance;
+    $scope.loadingIndicator = true;
+    $scope.fontSizeTreeView = 18;
+    $scope.toolTipActive = false;
+    $scope.treeviewClickItem = false;    
+
+    // Need to bind with the défault value of tool tip checkbox
+    //$scope.toolTipTarget = 'div.dx-item.dx-treeview-item.dx-state-hover'
+    $scope.toolTipTarget = 'null'
+
+
+    // To know if the user want to see deleted lines
+    $http({
+        url: 'Api/GetSettingDisplayDeletedLine',
+        method: 'GET',
+        params: {
+            ID_User: User.getID_User()
+        }
+    }).then(function (response) {
+        var result = response.data[0].CustomSettingValue;
+        //console.log(result);
+        if (result == 1)
+            $scope.displayDeletedLine = true
+        else
+            $scope.displayDeletedLine = false
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+        };
+
+    
+
+    // WIDGET show or not the tooltip
+    $scope.checkBoxToolTip = {
+        bindingOptions: {
+            value: 'toolTipActive'
+        },
+        onOptionChanged: function (e) {
+            if ($scope.toolTipActive) {
+                $scope.toolTipTarget = 'div.dx-item.dx-treeview-item.dx-state-hover'
+            }
+            else {
+                $scope.toolTipTarget = 'null'
+            }
+        }
+        //, text: "Afficher l'info-bulle"
+    }   
+
+    // WIDGET show or not the detail zone
+    $scope.checkBoxDetailZone = {
+        bindingOptions: {
+            value: 'treeviewClickItem'
+        }
+    }   
+   
+   // WIDGET font-size of treeview
+    $scope.sizeFontTreeView = {
+        bindingOptions: {
+            value: "fontSizeTreeView",
+        },
+        min: 8,
+        max: 24,
+        showSpinButtons: true
+    };
+
+    $scope.fontFamilyTreeView = fontFamily[0].font;
+
+    // WIDGET choose the family font of the treeview    
+    $scope.familyFontTreeView = {        
+        dataSource: fontFamily,   
+        valueExpr: "font",
+        bindingOptions: {
+            value: 'fontFamilyTreeView'
+        },
+        showPopupTitle: false,
+        closeOnOutsideClick: true,
+        placeholder: "Sélectionner une typographie",
+        displayExpr: "text",
+        onValueChanged: function (e) {
+            //console.log(e);
+        }
+    }    
+
+    // If the user right-click and open a new tab of this order
+    $scope.SendToTreeView = function (OrderData) {
+        // Dans ce cas, on ne sauvegarde pas cette recherche comme dernière commande recherchée 
+        User.getColor(User.getID_User()); // On charge les préférences couleurs        
+        Order.sendToTreeView(OrderData);                
+    }
+
+
+
+
+
+    /*
+    $http({
+        url: 'Api/GetCustomJsonOrder',
+        method: 'GET',
+        params: {
+            ID_Order: $scope.IdOrderNumber,
+            ID_View: User.getID_View(User.getID_User())
+        }
+    }).then(function (response) {
+
+        var setToFalse = false;        
+        $scope.jsonOrder = response.data;
+        for (var i = 0; i < $scope.jsonOrder.length; i++) {
+            if ($scope.jsonOrder[i].hasItems === 0) {                
+                $scope.jsonOrder[i].hasItems = setToFalse;                
+            }
+        }
+        console.log($scope.jsonOrder);
+
+        $scope.loadingIndicator = false;
+
+        // Si aucune donnée n'est chargée
+        if ($scope.jsonOrder.length === 0) {
+            DevExpress.ui.notify('Aucune donnée chargée ! Erreur possible : Aucune colonne n\'est cochée dans votre vue pour la zone du treeview', "error", 10000);
+            $scope.TVerror = "Erreur lors du chargement de la commande ! Aucune donnée n'a pu être obtenue.";
+        }
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+        };
+       */
+
+    $http({
+        url: 'Api/GetCustomJsonOrderFirstLine',
+        method: 'GET',
+        params: {
+            ID_Order: $scope.OrderData.IdOrder,
+            ID_View: User.getID_View(User.getID_User())
+        }
+    }).then(function (response) {        
+        $scope.jsonOrder = response.data;
+        for (var i = 0; i < $scope.jsonOrder.length; i++) {
+            if ($scope.jsonOrder[i].hasItems === 0) {
+                $scope.jsonOrder[i].hasItems = false;
+            }
+            else {
+                $scope.jsonOrder[i].hasItems = true;
+            }
+        }
+        //console.log($scope.jsonOrder);
+
+        $scope.loadingIndicator = false;
+
+        // Si aucune donnée n'est chargée
+        if ($scope.jsonOrder.length === 0) {
+            DevExpress.ui.notify('Aucune donnée chargée ! Erreur possible : Aucune colonne n\'est cochée dans votre vue pour la zone du treeview', "error", 1000);
+            $scope.TVerror = "Erreur lors du chargement des données de la commande ! Aucune donnée n'a pu être obtenue.";
+        }
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };
+
+    var nodeHasChildren = function (node) {
+        if (node.children.length === 0) {
+            return false;
+        }
+        else
+            return true;
+    };
+
+    //WIDGET TreeView
+    $scope.treeView = {
+        bindingOptions: {
+            items: 'jsonOrder'
+        },
+        dataStructure: "plain",      
+        parentIdExpr: "IdTreeviewParent",
+        keyExpr: "IdTreeview",
+        hasItemsExpr: "hasItems",
+        displayExpr: "NodeText",
+        noDataText: "",
+        rootValue: null,        
+        //virtualModeEnabled: true,  Ne fait pas gagner de temps       
+
+        onContentReady: function (e) {
+            //console.log(e);            
+            $scope.TreeViewOptionsInstanceComponent = e.component;
+        },
+        onItemExpanded: function (e) {
+            // TODO :: To put a vertical line to see where the node expanded is finish
+            //console.log(e);
+
+            // When expanding a node, get the children foreach child of the node
+            if (e.node.children.length) {
+                var nbChildren = e.node.children.length;
+                var nodeChildren = e.node.children;
+                
+                //console.log(nbChildren + ' enfant(s)');
+                $scope.jsonToAddOneTime = [];
+                $scope.jsonToAdd = [];
+
+                for (var i = 0; i < nbChildren; i++) {                                                 
+                    if (!nodeHasChildren(nodeChildren[i])) {
+                        //console.log(nodeChildren[i]);
+                        var childData = nodeChildren[i].itemData;
+
+                        $http({
+                            url: 'Api/GetCustomJsonLine',
+                            method: 'GET',
+                            params: {
+                                ID_View: User.getID_View(User.getID_User()),
+                                TableName: childData.TableName,
+                                IdDataSource: childData.IdDataSource,
+                                idTreeview: childData.IdTreeview
+                            }
+                        }).then(function (response) {
+                            console.log(response.data);
+                            $scope.jsonToAdd = response.data;
+
+                            // Ajout de son identifiant 'IdTreeview'
+                            for (var i = 0; i < $scope.jsonToAdd.length; i++) {
+                                $scope.jsonToAdd[i].IdTreeview = $scope.jsonOrder.length + i + 1;
+                            }                            
+
+                            // Ajout dans la source du TV (performe séparément sinon l'un prend le dessus, besoin d'une promise...)
+                            for (var i = 0; i < $scope.jsonToAdd.length; i++) {
+                                $scope.jsonOrder.push($scope.jsonToAdd[i]);                                
+                            }
+
+                            console.log($scope.jsonToAddOneTime);
+                            //$scope.jsonOrder.push($scope.jsonToAdd);
+
+                        }), function (response) {
+                            console.log(response);
+                            alert(reponse);
+                            };
+
+                        $scope.jsonToAddOneTime.push($scope.jsonToAdd[i]);
+                        console.log($scope.jsonToAddOneTime);
+                    }                    
+                    
+                }
+                
+                             
+            }
+        },
+        onItemRendered: function (e) {
+            //console.log(e);            
+
+            // Expand the first node (Order)
+            if (e.itemIndex === 1) {
+                e.node.internalFields.expanded = true;
+            }
+
+            //To change the size of each line                
+            e.itemElement[0].style.margin = "-6px 0px 0px 0px";
+            e.itemElement[0].style.padding = "0px 0px 0px 3px";
+            e.itemElement[0].style.lineHeight = "25px";
+
+            // To see or not the deleted lines
+            if (!$scope.displayDeletedLine) {
+                $scope.LineJsonData = angular.fromJson(e.itemData.JsonRawData);
+
+                
+                //if ($scope.LineJsonData[0].ATAT === "*") {                       
+                //    e.itemElement[0].hidden = true; }
+                
+                
+                var afterATAT = 'ATAT":"'.length;
+                var toFind = e.itemData.JsonRawData.indexOf('ATAT') + afterATAT;
+
+                if (e.itemData.JsonRawData.charAt(toFind) === '*') {
+                    e.itemElement[0].hidden = true;
+                }
+            }
+
+            //To change the color with the user setting
+            e.itemElement.css('color',
+                e.itemData.TypeLine === 'C' ? colorObj.Commande : e.itemData.TypeLine === 'A' ? colorObj.Ligne : e.itemData.TypeLine === 'O' ? colorObj.GammeOpe :
+                    e.itemData.TypeLine === 'P' ? colorObj.Pere : e.itemData.TypeLine === 'N' ? colorObj.Fils : e.itemData.TypeLine === 'V' ? colorObj.Virtuelle : e.itemData.TypeLine === 'U' ? colorObj.Usinage :
+                        e.itemData.TypeLine === 'S' ? colorObj.EtapeUsi : e.itemData.TypeLine === 'G' ? colorObj.MatiereGen : e.itemData.TypeLine === 'I' ? colorObj.IPM : e.itemData.TypeLine === 'F' ? colorObj.Fabrication :
+                            e.itemData.TypeLine === 'W' ? colorObj.PDC : "black");
+
+            //To find the text for tooltip with the mouse hover it
+            e.element
+                .find(".dx-treeview-item")
+                .on("mouseover", function (e) {
+
+                    var data = $(e.currentTarget).data().dxTreeviewItemData;
+                    $scope.toolTipOfNodeText = data.NodeToolTip;
+
+                    var element = document.getElementById('toolTipText')
+                    if (element != null) {
+                        element.innerHTML = $scope.toolTipOfNodeText;
+                        $scope.hideToolTip = false;
+                    }
+                });
+        },
+
+        onItemClick: function (node) {            
+            $scope.nodeData = node.itemData;            
+            //console.log(node);                           
+
+            // GET data for detail zone
+            $http({
+                url: 'Api/GetDetailLineData',
+                method: 'GET',
+                params: {
+                    ID_View: User.getID_View(User.getID_User()),
+                    TableSubLevelType: $scope.nodeData.TypeLine,
+                    TableName: $scope.nodeData.TableName,
+                    JsonField: $scope.nodeData.JsonRawData
+                }
+            }).then(function (response) {
+                //console.log(response.data);                    
+                $scope.detailLineData = response.data[0].DetailText
+
+                // To add <br> (need to pass the text by html and not by string)
+                var element = document.getElementById('zone-detail-text')
+                if (element != null) {
+                    element.innerHTML = $scope.detailLineData
+                }
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                };   
+        },
+
+        onItemContextMenu: function (e) {
+            $scope.parentNode = null;
+            //console.log(e);
+            $scope.nodeSelected = e.itemData;                        
+
+            if (e.node.children.length) {                
+                $scope.parentNode = e;
+                console.log($scope.parentNode);
+            }
+            
+            $scope.menuTarget = e.itemElement;                       
+        }
+    };
+
+    // Défaut, le menu TV est caché
+    $scope.menuVisible = false;
+
+    // WIDGET Context menu TV (right-click)
+    $scope.contextMenuTreeview = {                
+        target: 'div.dx-item.dx-treeview-item',
+        dataSource: ContextMenuTreeViewItems,
+
+        itemTemplate: function (itemData, itemIndex, itemElement) {
+            var template = $('<div></div>');
+            //var rootPathImg = 'Content/img/contextMenuTreeView/'
+            if (itemData.icon) {
+                template.append('<span class="' + itemData.icon + '"><span>');
+            }
+            template.append(' ' + itemData.text);
+            // If node avec children add a ->
+            if (itemData.items) {
+                template.append('<span class="dx-icon-spinright"><span>');
+            }
+            return template;
+        },
+
+        onItemClick: function (e) {
+            //console.log(e);
+            var key = e.itemData.key;
+            var subKey = e.itemData.subKey;
+
+            switch (key) {
+                case 'Expand': {
+
+                    break;
+                }
+                case 'Collapse': {
+                    //fERME TOUS LES Noeuds, faire juste ceux après les orderline
+                    $scope.TreeViewOptionsInstanceComponent.collapseAll();
+                    /*
+                    if ($scope.parentNode) {                                                
+                        $scope.parentNode.component.collapseItem($scope.parentNode.node.itemData.IdTreeview);
+                        //console.log($scope.parentNode.expanded);
+                    }*/
+                    break;
+                }
+                case 'New': {
+                    if (subKey === 'Order') {                                                            
+                        $scope.SendToTreeView($scope.OrderData);
+                        /*console.log($scope.$emit("CallSendToTreeView", { order: $scope.Order, agence: $scope.Agency }));
+                        $rootScope.$emit("CallSendToTreeView", { order: $scope.Order, agence: $scope.Agency });*/                        
+                    }
+                    else if (subKey === 'Line') {
+
+                    }
+
+                    break;
+                }               
+                case 'Export': {                    
+                    if (subKey) {
+                    }
+
+                    break;
+                }                
+                default: {
+
+                    break;
+                }
+            }
+
+
+            // If click on last item (with no children)
+            if (!e.itemData.items) {
+                DevExpress.ui.notify("The \"" + e.itemData.text + "\" item was clicked", "success", 1500);
+            }
+            //console.log($scope.nodeSelected);                       
+        }
+    }
+    
+
+    /*
+    // Click anywhere To disable the detail view
+    $(window).click(function (e) {
+        if ($scope.treeviewClickItem) {
+            console.log(e.target);
+            if (!e.target.className.startsWith("dx") && !e.target.id.startsWith("zone-detail") && !e.target.className.startsWith("btnFontSize")) {
+                $scope.treeviewClickItem = false;
+                $scope.$apply();
+            }
+        }
+    });
+    */
+   
+    //WIDGET ToolTip for node
+    $scope.toolTip = {        
+        position: 'bottom',
+        bindingOptions: {
+            target: 'toolTipTarget'    
+        },
+        //visible: $scope.toolTipActive,
+        onContentReady: function (e) {
+            $scope.toolTipInstance = e.component;
+            $scope.toolTipInstance.show();
+            console.log($scope.toolTipInstance);
+        },
+        showEvent: {
+            //name: 'dxpointerenter dxhoverstart',                
+            name: 'dxpointerover'
+        },
+        hideEvent: {
+            name: 'dxpointerout dxpointerleave',
+        },
+        animation: {
+            show: {
+                type: "pop",
+                from: {
+                    scale: 0.1,
+                    opacity: 0
+                },
+                to: {
+                    opacity: 1,
+                    scale: 1
+                }
+            },
+            hide: {
+                type: "pop",
+                from: {
+                    scale: 1,
+                    opacity: 1
+                },
+                to: {
+                    scale: 0.1,
+                    opacity: 0
+                }
+            }
+        }
+    };
+    
+    $scope.zoneDetail = {
+        handles: "left"
+        // in html ng-if to display it or not
+        // Options taille dans le style.CSS        
+    };
+
+    $scope.zoneScroll = {
+        scrollByContent: true,
+        scrollByThumb: true,
+        reachBottomText: 'Chargement...',
+        showScrollbar: 'onHover',
+        bounceEnabled: false,
+        scrollByContent: false
+    }
+
+    $scope.fontSizeDetail = 12;
+   
+    $scope.increaseFont = function () {
+        if ($scope.fontSizeDetail <= 24) {            
+            $scope.fontSizeDetail++;
+        }
+    }
+
+    $scope.decreaseFont = function () {
+        if ($scope.fontSizeDetail >= 8) {
+            $scope.fontSizeDetail--;
+        }
+    }
+    
+}

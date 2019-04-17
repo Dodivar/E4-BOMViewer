@@ -1,0 +1,19 @@
+﻿var ContextMenuTreeViewItems = [
+    {
+        text: 'Déployer',
+        items: [
+            { text: 'Juste ce noeud' },
+            { text: 'Tout le noeud' }]
+    },
+    { text: 'Fermer le noeud' },
+    {
+        text: 'Exporter',
+        items: [
+            { text: 'JPG' },
+            { text: 'PNG' },
+            { text: 'XLS' },
+            { text: 'HTML' }
+        ]
+    }    
+];
+

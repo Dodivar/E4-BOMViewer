@@ -1,0 +1,42 @@
+﻿var menu = [{
+    id: "1",
+    name: "Visualisation",
+    url: 'Home/Index',
+    items: [{
+        id: "1_1",
+        name: "d'une commande",
+        url: "Home/Recherche"
+    }, {
+        id: "1_2",
+        name: "d'un panel de commande",
+        url: "Home/Recherche"
+    }, {
+        id: "1_3",
+        name: "en mode comparatif",
+        url: "Compare/Index"
+    }]
+}, {
+    id: "2",
+        name: "Personnalisation",
+    url: "Custom/Index",
+    items: [{
+        id: "2_1",
+        name: "Utilisateur",
+        url: "Custom/Interface"
+    }, {
+        id: "2_2",
+        name: "Vue",
+        url: "Custom/Visualisation"
+    }]
+}, {
+    id: "3",
+    name: "Autre",
+    items: [{
+        id: "3_1",
+        name: "Autre Plus",
+        items: [{
+            id: "3_1_1",
+            name: "Autre"
+        }]
+    }]
+}];

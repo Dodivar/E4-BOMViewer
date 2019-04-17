@@ -1,0 +1,16 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div>
+    <h2>Visualisation</h2>
+    <ul>
+        <li><a href="/Recherche">Visualiser une commande</a></li>
+        <li><a href="/Recherche">Visualiser un panel de commande</a></li>
+    </ul>
+
+    <div ng-view></div>    
+</div>
+
+

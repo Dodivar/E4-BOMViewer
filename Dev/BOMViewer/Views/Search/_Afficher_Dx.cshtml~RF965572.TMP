@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "TreeViewDx";
+}
+
+<link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.spa.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.common.css" />
+<link rel="dx-theme" data-theme="generic.light" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.light.css" />
+
+
+<h2>Affichage</h2>
+<div class="dx-viewport" ng-controller="DemoController">
+    <div class="form">
+        <div id="simple-treeview" dx-tree-view="treeViewOptions"></div>
+    </div>
+
+
+    <div class="detailOrder">
+        <span style="font-weight:bold;">
+            Bibliothèque : {{Bib}}  <br />
+            N° de commande : {{Order}}  <br />
+            <span ng-if="{{Line}} !== null">N° de ligne : {{Line}}</span>
+        </span>
+        <br /><hr />
+        <span style="font-weight:bold;">DATA :</span>
+        {{jsonOrder}}
+    </div>
+</div>

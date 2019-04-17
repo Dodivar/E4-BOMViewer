@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+    if (Layout == null)
+    {
+        Layout = "~/Views/Shared/ForPartialViews/HomeMaster.cshtml";
+    }
+}
+
+<style>
+    /*  for angularJS element  */
+    input.ng-invalid {
+        background-color: lightgray;
+    }
+</style>
+
+<h3>d'une commande</h3>
+<div class="jumbotron" ng-controller="homeRecherche" ng-cloak>
+
+    <form name="Search" novalidate>
+        <p>
+            Agence :
+            <label id="fra">
+                '   '
+                <input type="radio" name="filiale" checked id="fra" value="   " />
+            </label>
+            <label id="all">
+                '100'
+                <input type="radio" name="filiale" id="all" value="100" />
+            </label>
+            <label id="esp">
+                '200''
+                <input type="radio" name="filiale" id="esp" value="200" />
+            </label>
+
+            <label ng-repeat="x.Age for x in Agency" id="{{Agency.Lib}}">
+                <input ng-model="selctedAgency" type="radio" name="filiale" id="{{Agency.Lib}}" value="{{Agency.Age}}" />
+            </label>
+
+            {{selectedAgency.id}}
+            {{selectedAgency.Age}}
+            {{selectedAgency.Lib}}
+        </p>
+
+        <p>
+            Bibliothèque :
+            <select name="listBib" ng-model="selectedLibrary" ng-options="x.Lib for x in Library" autofocus required></select> {{selectedLibrary.id}}
+        </p>
+
+        <p>
+            Table :
+            <input name="Order" type="text" ng-model="selectedOrder" ng-minlength="9" placeholder="Commande" required />
+            <span class="text-danger" ng-show="Search.Order.$error.minlength">
+                Une commande doit contenir au minimum 9 caractères
+            </span>
+        </p>
+
+        <p>
+            Ligne :
+            <input type="text" ng-model="selectedLine" ng-minlength="2" ng-maxlength="3" placeholder="N° ligne" />
+        </p>
+
+        <button ng-click="Display();" ng-disabled="Search.listBib.$pristine||Search.Order.$pristine||Search.Order.$error.minlength">Submit</button>
+        <button ng-click="reset()">Reset</button>
+
+        <h5 ng-show="resultAS400">Resultat de la requête :</h5>
+        <span ng-bind="resultAS400"></span>
+        <hr />
+
+        <span ng-bind="NomenclatureFirstLine"></span>
+
+
+
+    </form>
+</div>

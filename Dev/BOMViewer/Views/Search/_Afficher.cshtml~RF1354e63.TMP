@@ -1,0 +1,59 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<div ng-controller="searchTreeView" ng-cloak>
+
+    <div class="detailOrder">
+        <p style="font-weight:bold;">
+            Bibliothèque : {{Library}}  <br />
+            N° de commande : {{Agency}} - {{Order}}<br />
+            <span ng-if="Line">N° de ligne : {{Line}}</span>
+        </p>
+    </div>
+
+    <!--btn to raise the size of the font in the TreeView -->
+    <div class="dx-field">
+        <div class="dx-field-label">Taille du text</div>
+        <div class="dx-field-value">
+            <div dx-number-box="sizeFontTreeView"></div>
+        </div>
+    </div>
+
+    <div class="dx-field">
+        <div class="dx-field-value">
+            <div dx-check-box="checkBoxToolTip"></div>
+        </div>
+    </div>
+
+
+    <hr />
+    <div class="dx-viewport" style="width:50%;">
+        <h3>{{TVerror}}</h3>
+
+        <div id="small-indicator" dx-load-indicator="{height: 100, width: 100}" ng-if="loadingIndicator">
+        </div>
+
+        <div id="simple-treeview" dx-tree-view="treeView" style="font-size:{{fontSizeTreeView}}px">
+        </div>
+
+        <div dx-tooltip="toolTip" id="toolTip">
+            <p id="toolTipText"></p> <!-- Fill by innerHTML in js code -->
+        </div>
+
+    </div>
+
+
+    <div dx-resizable="zoneDetail" id="zone-detail" ng-if="treeviewClickItem">
+        <div dx-scroll-view="zoneScroll" id="scrollview">
+            <p id="zone-detail-text" style="font-size:{{fontSize}}px"></p> <!-- Fill by innerHTML in js code -->
+        </div>
+
+        <div id="font-size">
+            <button class="btnFontSize" ng-click="increaseFont()">+</button>
+            <button class="btnFontSize" ng-click="decreaseFont()">-</button>
+        </div>
+    </div>
+    <br />
+</div>
+

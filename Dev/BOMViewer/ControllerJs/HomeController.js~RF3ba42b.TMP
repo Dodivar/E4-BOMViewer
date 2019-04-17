@@ -1,0 +1,112 @@
+﻿'use strict';
+angular.module('BOMViewer')
+    .controller('homeAccueil', homeAccueil);
+
+homeAccueil.$inject = ['$scope', '$location', '$http', 'User'];
+
+
+function homeAccueil($scope, $location, $http, User) {
+    // Affiche la liste des tables 
+    $http({
+        url: 'Api/GetViewList',
+        method: 'GET', 
+        params: {
+            ID_User: User.getID_User()
+        }
+    }).then(function (response) {
+        $scope.resultTable = response.data;
+        console.log($scope.resultTable);
+
+
+        $http({
+            url: 'Api/GetViewList',
+            method: 'GET',
+            params: {
+                ID_User: User.getID_User()
+            }
+        }).then(function (response) {
+            console.log($scope.resultTable);
+
+            // WIDGET List of View
+            $scope.listOfView = {
+                items: $scope.resultTable,
+                showPopupTitle: false,
+                closeOnOutsideClick: true,
+                placeholder: "Sélectionner une vue",
+                displayExpr: "ViewName",
+                onItemClick: function (e) {
+                    //console.log(e.itemData);
+                    User.setID_View(User.getID_User(), e.itemData.ID_View);
+                }
+            };
+
+
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+            };   
+
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };   
+
+
+
+    // TOP 10 des commandes importées
+    $http({
+        url: 'Api/GetTop10ImportedOrder',
+        method: 'GET',
+        params: {
+            ID_User: User.getID_User()
+        }
+    }).then(function (response) {
+        $scope.resultTable = response.data;
+        //console.log($scope.resultTable);
+
+        // WIDGET Pie chart
+        $scope.chartOptions = {
+            type: "doughnut",
+            palette: "DarkMoon",
+            dataSource: $scope.resultTable,
+            title: "TOP 10 des commandes importées",
+            tooltip: {
+                enabled: true,
+                
+            },
+            legend: {
+                horizontalAlignment: "right",
+                verticalAlignment: "top",
+                margin: 0
+            },
+            export: {
+                enabled: true,
+                fileName: 'TOP10Order'
+            },
+            series: [{
+                argumentField: "OrderNumber",
+                valueField: "MaxVersion",
+                label: {
+                    visible: true,    
+                    connector: {
+                        visible: true
+                    }
+                }
+            }],
+            onTooltipShown: function (e) {
+                //console.log(e);
+            }
+        };
+
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };  
+
+
+}
+
+

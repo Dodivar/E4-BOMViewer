@@ -1,0 +1,440 @@
+﻿'use strict';
+
+angular.module('BOMViewer')
+    .controller('customVisualisation', customVisualisation)
+    .controller('customVisualisationColorbox', customVisualisationColorbox)
+    .controller('customVisualisationList', customVisualisationList)
+
+    .service('sharedProperties', function () {
+        var property;
+
+        return {
+            getProperty: function () {
+                return property;
+            },
+            setProperty: function (value) {
+                property = value;
+            }
+        };
+    });
+
+// Injection des dépendances des contrôleurs
+customVisualisation.$inject = ['$scope', '$location', '$http', 'sharedProperties'];
+customVisualisationColorbox.$inject = ['$scope', '$location', '$localStorage'];
+customVisualisationList.$inject = ['$scope', '$http', '$controller', 'sharedProperties'];
+
+
+
+function customVisualisation($scope, $location, $http, sharedProperties) {
+    // Accordion
+    $scope.animationDuration = 300;
+    $scope.collapsible = true;
+    $scope.multiple = true;
+    $scope.selectedItems = false; // No one will be expanded by default
+    var toDisplayForView = false;
+    $scope.sum = [];
+
+    $scope.accordionOptions = {
+        dataSource: accordionItems,
+        itemTemplate: "customer",
+        bindingOptions: {
+            animationDuration: "animationDuration",
+            collapsible: "collapsible",
+            multiple: "multiple",
+            selectedItems: "selectedItems"
+        }
+    };
+
+    // Button
+    $scope.applyButtonOptions = {
+        text: "Sauvegarder",
+        type: "success",
+        width: 150,
+        onClick: function (e) {
+            //location.replace('Custom/Visualisation');
+
+            //To modifidy preference of the selected View
+            $http({
+                url: 'Api/UpdatePreferenceView',
+                method: 'GET',
+                params: {
+                    listPrincipal: e.selectedItemsPrincipal,
+                    listDetail: e.selectedItemsDetail
+                }
+            }).then(function (response) {
+                console.log(response.data);
+                DevExpress.ui.notify("Configuration sauvegardé !");
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                DevExpress.ui.error("Erreur dans la sauvegarde de la configuration ! Veuillez réessayez plus tard.");
+            };
+        }
+    };
+
+    // Affiche la liste des Views        TODO : Ne montrer que les Vue où id_user is null / id_user est égal au sien
+    $http({
+        url: 'Api/GetViewList',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.result = response.data;
+        //console.log($scope.result);
+
+        $scope.listOfView = {
+            items: $scope.result,
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une vue",
+            displayExpr: "ViewName",
+            onItemClick: function (e) {
+                console.log(e.itemData);
+                $scope.toDisplayForView = true;
+                $scope.ViewName = e.itemData.ViewName;
+                $scope.ViewDesc = e.itemData.ViewDesc;
+                $scope.IdViewSelected = e.itemData.ID_View;
+
+
+                $http({
+                    url: 'Api/GetPreferenceOfView',
+                    method: 'GET',
+                    params: {
+                        idView: $scope.IdViewSelected
+                    }
+                }).then(function (response) {
+                    $scope.sum = [];
+                    var i = 0;
+                    while (i !== response.data.length) {
+                        $scope.sum.push(response.data[i].key); // KEY = ID_Column + _ + ID_TableSubLevel
+                        i++;
+                    }
+
+                    // Permet de créer une liste identifiant la colonne pour le type de ligne à pré-cocher lors de l'affichage des choix de zone de la vue
+                    $scope.selectedItemsPrincipal = $scope.sum;
+                    $scope.selectedItemsDetail = $scope.sum;       
+                    console.log($scope.sum);
+
+                    sharedProperties.setProperty($scope.sum);
+
+
+
+                }), function (response) {
+                    console.log(response);
+                };
+            }
+        };
+
+        $scope.IDView = response.data.ID_View;
+    }), function (response) {
+            console.log(response);
+            alert(reponse);
+        };
+
+
+
+
+    $scope.listOptionsPrincipale = {
+        height: 600,
+        keyExpr: "key",
+        bindingOptions: {
+            selectionMode: "selectionMode",
+            selectAllMode: "selectAllMode",
+            dataSource: "primaryList",
+            selectedItemKeys: "selectedItemsPrincipal"
+        },
+        showSelectionControls: true,
+        searchEnabled: true,
+        searchMode: "contains",
+        searchExpr: ['ColumnName', 'ColumnDesc'],
+        onItemClick: function (item) {
+            console.log($scope.selectedItemsPrincipal);
+        }
+    };
+
+    $scope.listOptionsSecondaire = {
+        height: 600,
+        keyExpr: "key",
+        bindingOptions: {
+            selectionMode: "selectionMode",
+            selectAllMode: "selectAllMode",
+            dataSource: "primaryList",
+            selectedItemKeys: "selectedItemsDetail"
+        },
+        showSelectionControls: true,
+        searchEnabled: true,
+        searchMode: "contains",
+        searchExpr: ['ColumnName', 'ColumnDesc'],
+
+        onItemClick: function (item) {
+            console.log($scope.selectedItemsDetail);
+        }
+    };
+
+
+
+    $http({
+        url: 'Api/GetTableList',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.resultTable = response.data;
+        console.log($scope.resultTable);
+
+        /*$scope.lookupOptionsTable = {
+            items: $scope.resultTable,
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une table",
+            displayExpr: "TableName",
+            onItemClick: function (e) {                
+                $scope.toDisplayLine = true;
+
+                $scope.SystemName = e.itemData.SystemName;
+                $scope.LibraryName = e.itemData.LibraryName;
+                $scope.TableName = e.itemData.TableName;*/
+
+
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };   
+
+
+
+}
+
+
+
+// COLOR BOX \\         INDEPENDANT DES VUES, LA COULEUR NE RENTRE PAS DANS LA CONFIG D'UNE VUE MAIS DANS LA PERSONNALISATION PERSONNELLE DE L'USER -> TAB_CustomSettingsValue
+function customVisualisationColorbox($scope, $location, $localStorage) {
+
+    $scope.$storage = $localStorage.$default({
+        bool: false
+    });
+
+    console.log($scope.$storage.bool);
+    var applyButton = "Valider";
+    var cancelButton = "Annuler";
+
+    $scope.colorBox = {
+        Ligne: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "N° de Ligne",
+            lib: "Ligne"
+        },
+        Colis: {
+            value: "#ff9900",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "N° de Colis",
+            lib: "Colis"
+        },
+        Pere: {
+            value: "#ffee00",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Père (P)",
+            lib: "Pere"
+        },
+        NomenclatureFils: {
+            value: "#8cff00",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Nomenclature Fils (N)",
+            lib: "NomenclatureFils"
+        },
+        Virtuelle: {
+            value: "#00a627",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Virtuelle (V)",
+            lib: "Virtuelle"
+        },
+        Usinage: {
+            value: "#00ffcc",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Usinage (U)",
+            lib: "Usinage"
+        },
+        EtapeUsi: {
+            value: "#0004ff",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Etape Usinage (S)",
+            lib: "EtapeUsi"
+        },
+        MatiereGen: {
+            value: "#A2F6E8",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Matière générée (G)",
+            lib: "MatiereGen"
+        },
+        IPM: {
+            value: "#00028c",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Infos Processus Matière (I)",
+            lib: "IPM"
+        },
+        Fabrication: {
+            value: "#c400ff",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Fabrication (F)",
+            lib: "Fabrication"
+        },
+        GammeOpe: {
+            value: "#864899",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Gamme d'opération (O)",
+            lib: "GammeOpe"
+        },
+        PDC: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Poste De Charge (W)",
+            lib: "PDC"
+        },
+        InfosProcPDC: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Infos Processus PDC (I)",
+            lib: "InfosProcPDC"
+        },
+        LigneColis: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Ligne colis (L)",
+            lib: "LigneColis"
+        }
+    };
+
+    var tmp; // For checkbox text
+    if ($scope.$storage.bool) {
+        tmp = "désactiver";
+    } else tmp = "activer";
+
+    // To enable "editAlphaChannel" for colorBox
+    $scope.checkBox = {
+        forAlphaChannel: {
+            bindingOptions: {
+                value: $scope.$storage.bool
+            },
+            text: "Cliquer pour " + tmp  + " la transparence",
+            value: $scope.$storage.bool
+        }
+    };
+
+    $scope.reload = function ($location) {        
+        $scope.$storage.bool = !$scope.$storage.bool;
+        console.log($scope.$storage.bool);
+        location.replace('Custom/Visualisation');
+    };
+}
+
+
+
+// LIST \\
+function customVisualisationList($scope, $http, $controller, sharedProperties) {
+
+    // Etendre le controller customeVisualisation pour accéder au même '$scope' et avoir la liste des champs à pré-cocher pour la vue ($scope.selectedItemsPrincipal & Detail)
+    angular.extend(this, $controller('customVisualisation', { $scope: $scope }));
+
+    $scope.selectAllMode = "allPages";
+    $scope.selectionMode = "multiple";
+
+
+    $scope.lookupOptionsTable = {
+        items: $scope.resultTable,
+        showPopupTitle: false,
+        closeOnOutsideClick: true,
+        placeholder: "Sélectionner une table",
+        displayExpr: "TableName",
+        onItemClick: function (e) {
+            $scope.toDisplayLine = true;
+            $scope.SystemName = e.itemData.SystemName;
+            $scope.LibraryName = e.itemData.LibraryName;
+            $scope.TableName = e.itemData.TableName;
+            toGetList();
+        }
+    };
+
+
+    /*On regarde la var TableName, si elle change on éxecute la fonction
+    $scope.$watch('TableName', function ($scope) {
+        alert("?");
+        }
+        */
+
+        function toGetList() {
+            // --------------For Line type of the Table
+            $http({
+                url: 'Api/GetTypeLineOfTable',
+                method: 'GET',
+                params: {
+                    tableName: $scope.TableName
+                }
+            }).then(function (response) {
+                $scope.resultTypeLine = response.data;
+                console.log($scope.resultTypeLine);
+
+                $scope.lookupOptionsLine = {
+                    items: $scope.resultTypeLine,
+                    showPopupTitle: false,
+                    closeOnOutsideClick: true,
+                    placeholder: "Sélectionner un type de ligne",
+                    displayExpr: "TableSubLevelType",
+                    onItemClick: function (e) {
+                        console.log(e.itemData.TableSubLevelType);
+                        $scope.toDisplay = true;
+
+                        // --------------For Principale List
+                        $http({
+                            url: 'Api/GetPrimaryListOptions',
+                            method: 'GET',
+                            params: {
+                                system: $scope.SystemName,
+                                library: $scope.LibraryName,
+                                table: $scope.TableName,
+                                line: e.itemData.TableSubLevelType
+                            }
+                        }).then(function (response) {
+                            $scope.primaryList = response.data;
+
+                        }), function (response) {
+                            console.log(response);
+                            alert(reponse);
+                        };
+                    }
+                };
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+            };
+        }
+}
+
+

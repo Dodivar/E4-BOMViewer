@@ -1,0 +1,14 @@
+﻿
+<div class="MenuToLoad">
+    <script src="~/Content/Items/menuItems.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.spa.css" />
+    <link rel="dx-theme" data-theme="generic.light" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.light.css" />
+
+    <div class="dx-viewport" ng-controller="Menu">
+        <div>
+            <div dx-menu="menuOptions">
+            </div>
+        </div>
+    </div>
+</div>

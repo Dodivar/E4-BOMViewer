@@ -1,0 +1,246 @@
+﻿'use strict';
+angular.module('BOMViewer')
+    .controller('Menu', Menu)
+    .controller('homeRecherche', homeRecherche)
+    .controller('homeTreeView', homeTreeView)
+    .controller('DefaultTreeView', DefaultTreeView)
+
+    // Changer le titre de la page en fonction du controller
+    .factory('PageTitle', function () {
+        var Title = 'Pagetitle';
+        return {
+            setTitle: function (newTitle) { Title = newTitle; },
+            getTitle: function () { return Title; }
+        };
+    })
+
+
+    .factory('GetPreferenceTreeView', function () {
+        var Title = 'Pagetitle';
+
+        $http({
+            url: 'Api/GetPreferenceView',
+            method: 'GET'/*,
+            params: { idOrder: $scope.idOrder }*/
+        }).then(function (response) {
+            //Send data to new tab for treeview
+            var newTab = window.open("Home/Treeview");
+            newTab.Library = $scope.selectedLibrary.Lib;
+            newTab.Agency = $scope.Agency.Age;
+            newTab.Order = $scope.selectedOrder;
+            newTab.Line = $scope.selectedLine;
+            newTab.jsonFromDbViewer = response.data;
+            console.log(response.data);
+
+        }), function (response) {
+            console.log(response);
+            alert(reponse);
+            };
+
+    return {
+        setTitle: function (newTitle) { Title = newTitle; },
+        getTitle: function () { return Title; }
+    };
+    });
+
+
+// Injection des dépendances des contrôleurs
+Menu.$inject = ['$scope', '$location'];
+homeRecherche.$inject = ['$scope', '$http', 'PageTitle'];
+homeTreeView.$inject = ['$scope', '$http', 'PageTitle'];
+DefaultTreeView.$inject = ['$scope', '$http'];
+
+// --- CONTROLLER PART ---\\
+// MENU \\
+function Menu($scope, $location) {
+    var showSubmenuModes = [{
+        name: "onHover",
+        delay: { show: 0, hide: 500 }
+    }, {
+        name: "onClick",
+        delay: { show: 0, hide: 300 }
+    }];
+
+    $scope.showFirstSubmenuMode = showSubmenuModes[0];
+    $scope.orientation = "horizontal";
+    $scope.submenuDirection = "rightOrBottom";
+    $scope.closeOnMouseLeave = true;
+
+    $scope.menuOptions = {
+        dataSource: menu,
+        displayExpr: "name",
+        onItemClick: function (data) {
+            location.replace(data.itemData.url);
+        },
+        bindingOptions: {
+            showFirstSubmenuMode: "showFirstSubmenuMode",
+            orientation: "orientation",
+            submenuDirection: "submenuDirection",
+            hideSubmenuOnMouseLeave: "closeOnMouseLeave"
+        }
+    };
+}
+
+// FORM \\
+function homeRecherche($scope, $http, PageTitle) {
+    PageTitle.setTitle("Recherche");
+
+    $scope.Library = [
+        { id: '1', Lib: 'GCFILELIB' },
+        { id: '2', Lib: 'DCEXPLF' },
+        { id: '3', Lib: 'HISTOTEC' }];
+
+    $scope.Agency = [
+        { id: '1', Age: '   ', Lib: 'FRA' },
+        { id: '2', Age: '100', Lib: 'ALL' },
+        { id: '3', Age: '200', Lib: 'ESP' }];
+
+    $scope.reset = function () {
+        $scope.selectedLibrary = angular.copy($scope.Library.Lib);
+        $scope.Agency.Age = angular.copy();
+        $scope.selectedOrder = angular.copy();
+        $scope.selectedLine = angular.copy();
+    };
+
+
+    $scope.getOrderVersion = function () {        
+        $http({
+            url: 'Api/getOrderVersion',
+            method: 'GET',
+            params: {
+                OrderAgence: $scope.Agency.Age,
+                OrderNumber: $scope.selectedOrder                
+            }
+        }).then(function (response) {
+            console.log(response.data);
+            if (response.data.length === 0) {
+                alert("0 version de la commande " + $scope.selectedOrder + ", chargement de ses données");
+                $scope.CopyOrderFromAS400();
+            }
+            else {
+                window.alert(response.data.length + " version de la commande " + $scope.selectedOrder + ". Voulez-vous la recharger ou en choisir une version ultérieur ?");
+
+                //TODO :: Charger la dernière version de la commande
+                $http({
+                    url: 'Api/getLastOrderVersion',
+                    method: 'GET',
+                    params: {
+                        Library: $scope.selectedLibrary.Lib,
+                        Agency: $scope.Agency.Age,
+                        Order: $scope.selectedOrder
+                    }
+                }).then(function (response) {
+                });
+            }
+        });
+    };
+
+    $scope.CopyOrderFromAS400 = function (e) {
+        $http({
+            url: 'Api/CopyOrderFromAS400',
+            method: 'GET',
+            params: {
+                Library: $scope.selectedLibrary.Lib,
+                Agency: $scope.Agency.Age,
+                Order: $scope.selectedOrder,
+                Line: $scope.selectedLine
+            }
+        }).then(function (response) {
+            if (response.data.length === 0) {
+                alert("La recherched de la commande n'a pas abouti, retour : " + response.data);
+            }
+            else {                
+                alert("La copie de la commande [" + $scope.selectedOrder + "] depuis la libraire [" + $scope.selectedLibrary.Lib + "] s'est correctement effectué");
+
+                var TreeViewPage = window.open("Home/Treeview");
+                TreeViewPage.Library = $scope.selectedLibrary.Lib;
+                TreeViewPage.Agency = $scope.Agency.Age;
+                TreeViewPage.Line = $scope.selectedLine;
+                TreeViewPage.OrderNumberAS400 = $scope.selectedOrder;
+                TreeViewPage.OrderNumber = response.data;
+            }
+        }), function (response) {
+                console.log(response);
+                alert(reponse);
+        };
+    };
+    
+}
+
+
+// DEVEXPRESS TREEVIEW \\
+function homeTreeView($scope, $http, PageTitle) {
+    //data sended by getOrderFromAs400 function
+    $scope.Library = window.Library;
+    $scope.Agency = window.Agency;
+    $scope.Order = window.Order;
+    $scope.Line = window.Line;
+    $scope.OrderNumberAS400 = window.OrderNumberAS400;
+    $scope.OrderNumber = window.OrderNumber;
+
+
+    $scope.getUserColor = function (e) {
+        //Charge les préférences couleur de utilisateur 
+    };
+
+    $scope.settingsColor = function (e) {
+        e.itemElement.css('color', e.itemData.CpBOMType === 'P' ? 'blue' : e.itemData.CpBOMType === 'N' ? 'red' : 'cyan');
+    };
+    
+    $http({
+        url: 'Api/GetCustomJsonOrder',
+        method: 'GET',
+        params: {
+            idOrder: $scope.Order,
+            idView: 3
+        }
+    }).then(function (response) {
+        $scope.jsonOrder = response.data;
+        console.log($scope.jsonOrder);
+        console.log($scope.jsonOrder);
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+        };
+
+    $scope.treeViewOptions = {
+        dataBinding: {
+            items: $scope.jsonOrder
+        },
+        //items: $scope.jsonOrder,
+        dataStructure: "plain",
+        parentIdExpr: "IdTreeviewParent",
+        keyExpr: "IdTreeview",
+        displayExpr: "NodeText",
+        onItemRendered: "settingsColor"
+    };
+
+}
+
+
+
+function DefaultTreeView($scope) {
+    $scope.treeViewOptions = {
+        items: defaultTreeView,
+        dataStructure: "plain",
+        parentIdExpr: "ID_CpBOM_Parent",
+        keyExpr: "ID_ComponentBOM",
+        displayExpr: "CpBOMType",
+
+        onItemRendered: function (e) {
+            e.itemElement.css('color', e.itemData.CpBOMType === 'P' ? 'blue' : e.itemData.CpBOMType === 'N' ? 'red' : 'cyan');
+        }        
+        /*,onItemClick: function (e) {
+            e.itemElement.css('background-color', e.itemData.CpBOMType === 'P' ? 'grey' : e.itemData.CpBOMType === 'N' ? 'green' : 'black');            
+        }*/
+
+
+        
+
+
+
+
+        
+    };
+}

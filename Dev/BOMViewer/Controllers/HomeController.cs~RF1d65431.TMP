@@ -1,0 +1,109 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Configuration;
+using System.Web.Mvc;
+using BOMViewer.Models;
+using IBM.Data.DB2.iSeries;
+
+namespace BOMViewer.Controllers
+{
+    public class HomeController : Controller
+    {
+        private string SqlCnxStr = WebConfigurationManager.ConnectionStrings["Pro-Cfg-SqlCnxStr"].ToString();
+        private string AS400CnxStr = WebConfigurationManager.ConnectionStrings["AS400CnxStr"].ToString();
+
+        public ActionResult Index()
+        {
+            return View();
+        }
+       
+        public ActionResult Recherche()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public string AfficherGood(Recherche recherche)
+        {
+            string bib = recherche.Bibliothèque.ToUpper();
+            int commande = recherche.Commande;
+            int ligne = recherche.Ligne;
+            string tab, SQLStatement = "";
+
+            /* AS400 Connection */
+            iDB2ConnectionStringBuilder iDB2CnxStrBuilder = new iDB2ConnectionStringBuilder { ConnectionString = AS400CnxStr };
+            AS400Manager _AS400 = new AS400Manager(iDB2CnxStrBuilder.ConnectionString);
+
+
+            // Base pour test toutes les bibliothèque avec des tables fixes (à améliorer)
+            switch (bib)
+            {
+                case "GCFILELIB":
+                    tab = "CDLGN";
+                    break;
+                case "DCEXPLF":
+                    tab = "CDTEC";
+                    break;
+                /*case "histotec":
+                    tab = "ngcpp";
+                    DataTable ASQuery = _AS400.GetData(AS400CnxStr, "select * from histotec.ngcpp where cdno$d = " + commande);
+                    break;*/
+                default:
+                    tab = "";
+                    break;
+            }
+
+
+            if (ligne >= 10)
+            {
+                SQLStatement = "select * from " + bib + "." + tab + " where cdno$d = " + commande + " and CDLG$D = " + ligne;
+            }
+            else
+            {
+                SQLStatement = "select * from " + bib + "." + tab + " where cdno$d = " + commande;
+            }
+
+            //Get DataTable from AS400 to displayed it
+            DataTable ASQuery = _AS400.GetData(AS400CnxStr, SQLStatement);
+
+            // Export it to XML file
+            _AS400.ExportToXML(AS400CnxStr, SQLStatement, commande, ligne);
+
+
+
+            // 1 serialize JSON directly to a files
+            string json = _AS400.ConvertDataTabletoString(AS400CnxStr, SQLStatement);
+            System.IO.File.WriteAllText("c:/users/dillensegerd/desktop/BOMViewer-XML/" + commande + "_" + ligne + ".json", json);
+
+            SQLServerManager sql = new SQLServerManager(SqlCnxStr);
+            sql.ImportOrderFromAS400(SqlCnxStr, "   ", commande, "MURPHY_CT", "GCFILELIB");
+
+            ViewBag.SQLStatement = "Recherche dans : " + bib + "." + tab + " commande : [" + commande + "]";
+
+            return json;
+        }
+
+
+
+        [HttpGet]
+        public string AfficherBad()
+        {
+            string essai = "Fonctionne";
+            return essai;
+        }
+
+
+        public ActionResult Autre()
+        {
+            return View();
+        }
+
+        public ActionResult Demo()
+        {
+            return View();
+        }
+    }
+}

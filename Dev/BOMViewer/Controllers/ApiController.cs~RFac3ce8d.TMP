@@ -1,0 +1,99 @@
+﻿using BOMViewer.Models;
+using IBM.Data.DB2.iSeries;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Configuration;
+using System.Web.Helpers;
+using System.Web.Mvc;
+using System.Web.Routing;
+using System.Web.Script.Serialization;
+
+namespace BOMViewer.Controllers
+{
+    public class ApiController : Controller
+    {
+        private readonly string SqlCnxStr = WebConfigurationManager.ConnectionStrings["Pro-Cfg-SqlCnxStr"].ToString();
+        private readonly string AS400CnxStr = WebConfigurationManager.ConnectionStrings["AS400CnxStr"].ToString();
+
+        // GET: Api/...
+        [HttpGet]
+        public long CopyOrderFromAS400(Recherche recherche)
+        {
+            SQLServerManager sql = new SQLServerManager(SqlCnxStr);    
+            long result = sql.SP_ImportOrderFromAS400(SqlCnxStr, recherche.Agency, recherche.Order, "MURPHY_CT", recherche.Library.ToUpper());        
+            
+            return result;
+        }
+      
+
+        [HttpGet]
+        public string GetNomenclatureLines (long idOrder)
+        {           
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string jsonOrder = SQL.SP_GetOrderComponents(SqlCnxStr, idOrder);
+
+            return jsonOrder;
+        }
+
+
+        [HttpGet]
+        public string GetPrimaryListOptions(string system, string library, string table)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string primaryList = SQL.SP_GetPrimaryList(SqlCnxStr, system, library, table);
+
+            return primaryList;
+        }
+
+
+
+        [HttpGet]
+        public string GetTableList()
+        {
+            string SQLStatement = "SELECT SystemName, LibraryName, TableName FROM DB_BOM_VIEWER.dbo.TAB_Tables WHERE LibraryName = 'DCEXPLF'";
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+
+            DataTable TableOfTableList = SQL.GetData(SqlCnxStr, SQLStatement);
+
+            string tableList = SQL.ConvertDataTableToJsonString(SqlCnxStr, TableOfTableList);
+            return tableList;
+        }
+
+
+
+
+        [HttpGet]
+        public string GetViewList()
+        {
+            string SQLStatement = "SELECT ID_View, ViewName, ViewDesc FROM DB_BOM_VIEWER.dbo.TAB_Views WHERE ID_User IS NULL";
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+
+            DataTable TableOfTableList = SQL.GetData(SqlCnxStr, SQLStatement);
+
+            string tableList = SQL.ConvertDataTableToJsonString(SqlCnxStr, TableOfTableList);
+            return tabkeList;
+        }
+
+
+
+        [HttpGet]
+        public bool PostPreferenceView(ItemListColumn[] ListePrincipale, ItemListColumn[] ListeSecondaire)
+        {
+            bool res = false;
+
+            string SQLStatement = "SELECT SystemName, LibraryName, TableName FROM DB_BOM_VIEWER.dbo.TAB_Tables WHERE LibraryName = 'DCEXPLF'";
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+
+            DataTable TableOfTableList = SQL.GetData(SqlCnxStr, SQLStatement);
+
+            string tableList = SQL.ConvertDataTableToJsonString(SqlCnxStr, TableOfTableList);
+            return res;
+        }
+
+    }
+
+}

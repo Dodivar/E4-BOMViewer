@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "Custom Visualisation";       
+    Layout = "~/Views/Shared/_Layout.cshtml";    
+}
+
+
+<div class="title col-sm-12">
+    <h1>Personnalisation des vues</h1>
+</div>
+<hr/>
+
+<div class="dx-viewport" ng-controller="view" ng-init="init()">
+
+
+    <div class="dx-fieldset" style="margin-bottom:50px;">
+        <div class="dx-fieldset-header">Modification d'une vue :</div>
+        <div class="dx-field">
+            <div dx-lookup="listOfView"></div>
+        </div>
+    </div>
+
+
+
+    <div class="dx-fieldset">
+        <div class="dx-fieldset-header">Création d'une vue :</div>
+        <div class="dx-field">
+            <div dx-text-box="viewNameInput" style="margin-bottom:5px;"></div>
+            <div dx-text-box="viewDescInput"></div>
+            <div dx-button="createViewBtn" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+
+    <div class="dx-fieldset">
+        <div class="dx-fieldset-header">Suppression d'une vue :</div>
+        <div class="dx-field">
+            <div dx-lookup="listOfViewDeletable"></div>
+            <div dx-button="deleteViewBtn" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+</div>

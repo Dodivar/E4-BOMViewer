@@ -1,0 +1,30 @@
+﻿
+<div ng-controller="customVisualisationLine">
+    <h4 style="color:red;">Choix de la vue :</h4>
+     
+    <div class="dx-fieldset">
+        <div class="dx-fieldset-header">Vue :</div>
+        <div class="dx-field">
+            <div dx-lookup="lookupOptions"></div>
+        </div>
+    </div>
+
+
+    <div class="widget-container" ng-show="toDisplay">
+        <div dx-list="listOptionsPrincipale" dx-item-alias="line" >
+            <div data-options="dxTemplate: {name: 'item'}">
+                <div class="line">
+                    <div>{{line.ColumnName}} ({{line.ColumnDesc}}) <b>- LIGNE : {{line.TableSubLevelType}}</b></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br /><hr />
+
+
+
+
+
+
+</div>

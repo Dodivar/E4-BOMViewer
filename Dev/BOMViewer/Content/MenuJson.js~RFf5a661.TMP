@@ -1,0 +1,35 @@
+﻿var menuData = [{
+    id: "1",
+    name: "Visualiser",
+    items: [{
+        id: "1_1",
+        name: "Une commande",
+        url: "Home/Recherche"
+    }, {
+        id: "1_2",
+        name: "Un panel de commande",
+        url: "Home/Recherche"
+    }]
+}, {
+    id: "2",
+    name: "Personnaliser",
+    items: [{
+        id: "2_1",
+        name: "L'interface",
+        url: "Home/Personnalisation"
+    }, {
+        id: "2_2",
+        name: "L'affichage d'une visualisation"
+    }]
+}, {
+    id: "4",
+    name: "Projectors",
+    items: [{
+        id: "4_1",
+        name: "Projector Plus",
+        items: [{
+            id: "4_1_1",
+            name: "Autre"
+        }]
+    }]
+}];

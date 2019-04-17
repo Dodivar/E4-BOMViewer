@@ -1,0 +1,67 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="title col-sm-12">
+    <div class="block-title-index" style="font-size: 1.5em;">
+        <h1><img src="~/Content/img/BOMViewer.png" style="width: auto;" />BOMViewer</h1>
+    </div>
+</div>
+<hr />
+
+<div class="dx-viewport" ng-controller="homeAccueil" ng-init="init()">
+
+    <section>
+        <div class="block-list-index">
+            <div class="block-list-item-index">
+                <h2>Menu</h2>
+                <ul>
+                    <li><a href="#">Accueil</a></li>
+                    <li><a href="Search">Recherche de commande</a></li>
+                    <li><a href="Custom/UserSetting">Personnalisation utilisateur</a></li>
+                    <li><a href="Custom/Visualisation">Personnalisation de vue</a></li>
+                    <li><a href="#">Aide en ligne</a></li>
+                </ul>
+            </div>
+            <div class="block-list-item-index">
+                <h2>Documentation</h2>
+                <ul>
+                    <li>
+                        <a href="http://delphes/OPERA/CD2/D14%20%20Architecture/Forms/AllItems.aspx?RootFolder=%2FOPERA%2FCD2%2FD14%20%20Architecture%2FBOMViewer&FolderCTID=0x012000B07B3F9AF4513B4DA0235EB9E5682DD4&View=%7bC4515466-C8A3-4BD8-9DFC-3F834E7E1545%7d" target="_blank">BOMViewer</a>
+                        <ul>
+                            <li><a href="http://delphes/OPERA/CD2/D14%20%20Architecture/Forms/AllItems.aspx?RootFolder=%2FOPERA%2FCD2%2FD14%20%20Architecture%2FBOMViewer%2FDocs%5FTechnique&FolderCTID=0x012000B07B3F9AF4513B4DA0235EB9E5682DD4" target="_blank">Documentation technique</a></li>
+                            <li><a href="http://delphes/OPERA/CD2/D14%20%20Architecture/Forms/AllItems.aspx?RootFolder=%2FOPERA%2FCD2%2FD14%20%20Architecture%2FBOMViewer%2FDocumentations&FolderCTID=0x012000B07B3F9AF4513B4DA0235EB9E5682DD4" target="_blank">Documentation</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="http://delphes/OPERA/CD2/D14%20%20Architecture/Forms/AllItems.aspx?RootFolder=%2FOPERA%2FCD2%2FD14%20%20Architecture%2FBOMViewer%2FNomenclatureViewer&FolderCTID=0x012000B07B3F9AF4513B4DA0235EB9E5682DD4" target="_blank">Nomenclature Viewer</a>
+                        <ul>
+                            <li><a href="http://delphes/OPERA/CD2/D14%20%20Architecture/BOMViewer/NomenclatureViewer/Nomenclature%20Viewer%20-%20Installation%20-%202010.doc" target="_blank">Installation</a></li>
+                            <li><a href="http://delphes/OPERA/CD2/D14%20%20Architecture/BOMViewer/NomenclatureViewer/Nomenclature%20Viewer%20-%20Manuel%20Utilisation%20-%202010.doc" target="_blank">Manuel Utilisation</a></li>
+                            <li><a href="http://delphes/OPERA/CD2/D14%20%20Architecture/BOMViewer/NomenclatureViewer/Nomenclature%20Viewer%20-%20Note%20Technique.doc" target="_blank">Note technique</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="block-list-item-index">
+                <h2>Aide en ligne</h2>
+                <ul>
+                    <li><a href="#">Rechercher une commande ?</a></li>
+                    <li><a href="#">Modifier vos paramètres utilisateur ?</a></li>
+                    <li><a href="#">Créer une nouvelle vue ?</a></li>
+                    <li><a href="#">Modification des paramètres de la vue ?</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
+    <div class="dx-fieldset">
+        <div class="dx-fieldset-header">Vue active :</div>
+        <div class="dx-field" style="width:40%;">
+            <div dx-lookup="listOfView"></div>
+        </div>
+    </div>
+
+</div>

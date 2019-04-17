@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <!--<base href="@Url.Content("~")">-->
+    <base href="/">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOMViewer</title> <!-- TO IMPROVE!  -> DEPENDING ON EACH PAGE -->
+
+    <meta name="description" content="A website application mainly to view BOM of order" />
+    <meta name="author" content="Schmidt Groupe" />
+
+
+    <link rel="stylesheet" type="text/css" href="~/SG/styles/Vendor/DevExpress/dx-spa.css" />
+    <link rel="stylesheet" type="text/css" href="~/SG/styles/Vendor/DevExpress/dx-common.css" />
+
+    <link rel="dx-theme" data-theme="generic.light" href="~/SG/styles/Vendor/DevExpress/Theme/dx-light.css" data-active="false" />
+    <link href="~/SG/styles/Vendor/DevExpress/Theme/dx-sg.css" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="~/SG/styles/Vendor/Bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/SG/styles/Vendor/Font-Awesome/css/all.min.css" />
+
+
+    @Scripts.Render("~/bundles/modernizr")
+
+    @Styles.Render("~/bundles/cssSG")    
+
+
+</head>
+
+<body ng-app="BOMViewer" id="main">
+    <div class="container" ng-controller="headerLayout">
+        <ul id="gn-menu" class="gn-menu-main">
+            <li class="gn-trigger">
+                <a class="gn-icon gn-icon-menu"><span>Menu</span></a>
+                <nav class="gn-menu-wrapper gn-open-part">
+                    <div class="gn-scroller">
+                        <ul class="gn-menu">
+                            <li><a href="Home/Index"><i class="fa fa-home fa-lg"></i>Accueil</a></li>
+                            <li>
+                                <a href="Search"><i class="fa fa-eye fa-lg"></i>Visualisation</a>
+                                <ul class="gn-submenu">
+                                    <li><a href="Search"><i class="fa fa-search fa-lg"></i>Recherche d'une commande</a></li>
+                                    <li><a href="Search/Recherche"><i class="fa fa-not-equal fa-lg"></i>Comparatif</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="UserSetting"><i class=" fa fa-cogs fa-lg"></i>Personnalisation</a>
+                                <ul class="gn-submenu">
+                                    <li><a href="UserSetting"><i class="fa fa-user fa-lg"></i>Utilisateur</a></li>
+                                    <li><a href="View"><i class="fa fa-filter fa-lg"></i>Vue</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#"><i class="far fa-question-circle fa-lg"></i>Aide</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </li>
+            <li><a href="Home/Index"><img src="~/Content/img/SchmidtGroupe.png" alt="logo" /><!--<img src="Content/img/SchmidtGroupe.png" alt="logo" />--></a></li>
+            <li><a href="#" id="profil">@User.Identity.Name</a></li>
+        </ul>
+    </div>
+
+    <!-- LOADER SG -->
+    <div class="container-loader" id="loader">
+        <div class="circle loader1">
+            <div class="circle loader2"></div>
+        </div>
+
+    </div>
+
+
+    <!-- BODY SECTION -->
+    <div class="body-content" id="container" style="display: none;">
+        @*if (@User.Identity.Name == null)
+        {
+            <h1>Erreur</h1>
+            <h2>Vous n'êtes pas authentifié.</h2> 
+        }
+        else {*@
+            @RenderBody()
+        
+        <footer>
+            <hr />
+            <p style="text-align:center;">&copy; @DateTime.Now.Year - DOSI MSM - Schmidt Groupe</p>
+        </footer>
+    </div>
+
+    
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/angular")
+
+    @Scripts.Render("~/bundles/scriptDevExpress")
+    @Scripts.Render("~/bundles/angularController")
+
+    @Scripts.Render("~/bundles/jsSG")
+    @Scripts.Render("~/bundles/itemsJs")
+
+
+    <script>
+        // LOADER \\
+        new gnMenu(document.getElementById('main'));
+
+        var container = document.getElementById("container");
+        var loader = document.getElementById("loader");
+
+        window.onload = function () {
+            container.style.display = "block";
+            loader.style.opacity = "0";
+            setTimeout(function () { loader.style.display = "none"; }, 3000);
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+﻿@{
+                /**/
+
+                Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<div class="title col-sm-12">
+    <div class="block-title-index" style="font-size: 1.5em;">
+        <h1><img src="~/Content/img/BOMViewer.png" style="width: auto;" />BOMViewer</h1>
+    </div>
+</div>
+<hr />
+
+<div class="dx-viewport" ng-controller="registration" ng-init="init()">
+    <div class="title">
+        <h1>Première connexion ?</h1>
+        <p>Indiquer nous votre nom et prénom : </p>
+    </div>
+
+    <section>
+        <div>
+            <div class="dx-fieldset" style="width:50%;">
+                <div class="dx-fieldset-header">Inscription :</div>
+                <div class="dx-field">
+                    <div dx-text-box="firstNameInput" style="margin-bottom:5px;"></div>
+                    <div dx-text-box="surNameInput" style="margin-bottom:5px;"></div>
+                    <div dx-text-box="login"></div>
+                    <div dx-button="registrationBtn" style="margin-top:10px;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+

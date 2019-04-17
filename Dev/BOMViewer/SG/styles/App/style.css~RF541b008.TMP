@@ -1,0 +1,244 @@
+html {
+    /* Cache la barre de défilement x */
+    overflow-x: hidden;
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+}
+
+
+.body-content {
+    margin: 3vh 2vh 0vh 10vh;
+
+    -webkit-transition: -webkit-transform 0.3s, width 0.3s;
+    -moz-transition: -moz-transform 0.3s, width 0.3s;
+    transition: transform 0.3s, width 0.3s;
+}
+
+.gn-body-move {
+
+    -webkit-transform: translateX(280px);
+    -moz-transform: translateX(280px);
+    transform: translateX(280px);
+    -webkit-transition: -webkit-transform 0.3s, width 0.3s;
+    -moz-transition: -moz-transform 0.3s, width 0.3s;
+    transition: transform 0.3s, width 0.3s;
+}
+
+.container-loader {
+    text-align: center;
+    width: 10%;
+    margin: 0 auto;
+}
+
+.circle {
+    border: 5px solid transparent;
+    border-radius: 50%;
+}
+
+.loader1 {
+    width: 100px;
+    height: 100px;
+    display: table;
+    padding: 10px;
+    border-top: 5px solid grey;
+    border-bottom: 5px solid grey;
+    animation: circular_loader1 linear 2s infinite;
+}
+
+.loader2 {
+    width: 10px;
+    height: 10px;
+    display: table-cell;
+    padding: 10px;
+    border-top: 5px solid red;
+    border-bottom: 5px solid red;
+    animation: circular_loader2 linear 2s infinite;
+}
+
+
+/* Progress-bar  */
+.loading .dx-progressbar-range {
+    background-color: royalblue;
+    border-color: royalblue;
+}
+.error .dx-progressbar-range {
+    background-color: darkorange;
+    border-color: darkorange;
+}
+.dx-progressbar-range {
+    background-color: limegreen;
+    border-color: limegreen;
+}
+/* /////////////////  \\\\\\\\\\\\\\ */
+
+/* ----- ZONE DETAIL Style ----- */
+/* ----- BEGIN ----- */
+#zone-detail {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 500px;
+    max-width: 500px;
+    min-width: 300px;
+    height: 100%;
+    background-color: white;
+    padding: 5px 0px 5px 5px;
+    margin: 0px 0 0 0;
+    border-left: 2px solid black;
+    border-bottom: 0px;
+    border-top: 0px;
+    border-right: 0px;
+}
+
+#zone-detail-text {
+    color:black;
+}
+
+#font-size {
+    position: fixed;
+    margin: 10px 10px 10px 10px;
+    bottom: 0;
+    right: 0;
+}
+
+.btnFontSize {
+    background-color: white;
+    width: 30px;
+    height: 30px;
+}
+
+#btnCloseDetail {
+    right: 100px;
+}
+
+
+/* ----- TOOL TIP Style ----- */
+#toolTipText {
+    text-align:left;
+}
+/* ----- Chart on home page Style ----- */
+#pie-chart-top-order {
+    width: 50%;
+}
+
+
+
+
+
+/* ----- Accordion Style ----- */
+/* ----- BEGIN ----- */
+#accordion h1 {
+    font-size: 20px;
+}
+
+.dx-theme-material #accordion .dx-accordion-item-opened h1 {
+    margin-top: 7px;
+}
+
+.options,
+.selected-data {
+    padding: 20px;
+    background-color: rgba(191, 191, 191, 0.15);
+    margin-top: 20px;
+}
+
+.selected-data {
+    position: relative;
+    height: 36px;
+}
+
+    .selected-data > .caption {
+        position: relative;
+        top: 5px;
+        margin-right: 10px;
+        font-weight: bold;
+        font-size: 115%;
+    }
+
+    .selected-data > .dx-widget {
+        position: absolute;
+        left: 140px;
+        right: 20px;
+        top: 20px;
+    }
+
+.options > .caption {
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.option {
+    margin-top: 10px;
+}
+/* ----- END ----- */
+/* ----- Accordion Style ----- */
+
+
+
+@media screen and (max-width: 576px) {
+    #pie-chart-top-order {
+        display: none;
+    }
+}
+
+
+
+
+.title h1 {
+    -webkit-animation: title 0.5s forwards 0s ease-out; /* Safari 4+ */
+    -moz-animation: title 0.5s forwards 0s ease-out; /* Fx 5+ */
+    -o-animation: title 0.5s forwards 0s ease-out; /* Opera 5+ */
+    animation: title 0.5s forwards 0s ease-out; /*IE 10+, Fx 29 */
+}
+
+.title h3 {
+    opacity: 0;
+    -webkit-animation: title 0.5s forwards 0.1s ease-out; /* Safari 4+ */
+    -moz-animation: title 0.5s forwards 0.1s ease-out; /* Fx 5+ */
+    -o-animation: title 0.5s forwards 0.1s ease-out; /* Opera 5+ */
+    animation: title 0.5s forwards 0.1s ease-out; /*IE 10+, Fx 29 */
+    color: darkgrey;
+}
+
+@keyframes title {
+    0% {
+        transform: translateY(25px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0px);
+        opacity: 1;
+    }
+}
+
+
+@keyframes circular_loader1 {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-90deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes circular_loader2 {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-180deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,86 @@
+﻿using System.Web;
+using System.Web.Optimization;
+
+namespace BOMViewer
+{
+    public class BundleConfig
+    {
+        // Pour plus d'informations sur le regroupement, visitez https://go.microsoft.com/fwlink/?LinkId=301862
+        public static void RegisterBundles(BundleCollection bundles)
+        {
+            bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
+                        "~/Scripts/jquery-{version}.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
+                        "~/Scripts/jquery.validate*"));
+
+            // Utilisez la version de développement de Modernizr pour le développement et l'apprentissage. Puis, une fois
+            // prêt pour la production, utilisez l'outil de génération à l'adresse https://modernizr.com pour sélectionner uniquement les tests dont vous avez besoin.
+            bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
+                        "~/Scripts/modernizr-*"));
+
+
+
+
+            // Ajout des fichiers Bootstrap
+            bundles.Add(new StyleBundle("~/bundles/bootstrap").Include(
+                      "~/SG/styles/Vendor/bootstrap.css",
+                      "~/Scripts/bootstrap.min.js"/*,
+                      "~/Content/site.css"*/));
+
+
+            // Ajout des fichiers Angular
+            bundles.Add(new ScriptBundle("~/bundles/angular").Include(
+                    "~/Scripts/angular.min.js",
+                    "~/Scripts/angular-resource.min.js",
+                    "~/Scripts/angular-route.min.js",
+                    "~/Scripts/ngStorage.min.js"));
+
+
+            // For DevExpress dependencies script ('dx')       
+            bundles.Add(new ScriptBundle("~/bundles/scriptDevExpress")
+                    .Include("~/SG/scripts/Vendor/dx-all.js"));            
+
+
+            // For DevExpress dependencies style ('dx')       
+            bundles.Add(new StyleBundle("~/bundles/styleDevExpress")
+                    .Include("~/SG/styles/Vendor/DevExpress/dx-common.css",
+                             "~/SG/styles/Vendor/DevExpress/dx-spa.css"));
+
+            // Ajout des thèmes pour les composants [DevExpress]
+            bundles.Add(new StyleBundle("~/bundles/themeDevExpress")
+                    .Include("~/SG/styles/Vendor/DevExpress/Theme/dx/light.css"));
+
+
+
+            // Ajout des Controlleur
+            bundles.Add(new ScriptBundle("~/bundles/angularController")
+                    .IncludeDirectory("~/ControllerJs/", "*.js", true));
+
+            // Ajout des styles perso
+            bundles.Add(new StyleBundle("~/bundles/cssSG")
+                    .IncludeDirectory("~/SG/styles/App/", "*.css", true));
+
+            // Ajout des scripts perso
+            bundles.Add(new ScriptBundle("~/bundles/jsSG")
+                    .IncludeDirectory("~/SG/scripts/App/", "*.js", true));
+
+
+
+            // Ajout des styles Font-Awesome
+            bundles.Add(new StyleBundle("~/bundles/font-awesome")
+                    .IncludeDirectory("~/SG/styles/Vendor/Font-Awesome", "*.*", true));
+
+            /*
+            // Ajout des scripts perso 
+            bundles.Add(new ScriptBundle("~/bundles/BOMViewerDirectives")
+                    .IncludeDirectory("~/Directives/", "*.js", true)); // Factory + Service
+            */
+
+
+
+            // TO DEPLOY ON IIS SERVER
+            //BundleTable.EnableOptimizations = false;
+        }
+    }
+}

@@ -1,0 +1,26 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<div class="jumbotron" ng-controller="FormCtrl">
+    <form>
+        Bibliothèque :
+        <select name="selectionOfBib" ng-model="selectedBib" ng-options="bib for bib in bibliotheque"></select>
+
+        <br />
+        Table : <input type="text" ng-model="selectedTable" />
+        <br /><br />
+
+        <button ng-click="reset()">RESET</button>
+        <button ng-click="">SUBMIT</button>
+
+
+        <p> <span ng-repeat="bib in bibliotheque">{{bibliotheque}}</span></p>
+
+
+        {{selectedBib}}
+
+
+        {{selectedTable}}
+    </form>
+</div>

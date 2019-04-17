@@ -1,0 +1,182 @@
+﻿var linePrincipale = [{ id: 1, text: "Niveau article généré" },
+{ id: 2, text: "Composant ou ss-nomenclature généré(e)" },
+{ id: 3, text: "Type ligne de nomenclature générée" },
+{ id: 4, text: "Désignation" },
+{ id: 5, text: "New Brochures" },
+{ id: 6, text: "2016 Brochure Designs" },
+{ id: 7, text: "Brochure Design Review" },
+{ id: 8, text: "Website Re-Design Plan" },
+{ id: 9, text: "Rollout of New Website and Marketing Brochures" },
+{ id: 10, text: "Create 2012 Sales Report" },
+{ id: 11, text: "Direct vs Online Sales Comparison Report" },
+{ id: 12, text: "Review 2012 Sales Report and Approve 2016 Plans" },
+{ id: 13, text: "Submit Signed NDA" },
+{ id: 14, text: "Update Revenue Projections" },
+{ id: 15, text: "Review Revenue Projections" },
+{ id: 16, text: "Comment on Revenue Projections" },
+{ id: 17, text: "Scan Health Insurance Forms" },
+{ id: 18, text: "Sign Health Insurance Forms" },
+{ id: 19, text: "Follow up with West Coast Stores" },
+{ id: 20, text: "Follow up with East Coast Stores" },
+{ id: 21, text: "Submit Refund Report for 2016 Recall" },
+{ id: 22, text: "Give Final Approval for Refunds" },
+{ id: 23, text: "Prepare Product Recall Report" },
+{ id: 24, text: "Review Product Recall Report by Engineering Team" },
+{ id: 25, text: "Review Training Course for any Ommissions" },
+{ id: 26, text: "Review Overtime Report" },
+{ id: 27, text: "Submit Overtime Request Forms" },
+{ id: 28, text: "Overtime Approval Guidelines" },
+{ id: 29, text: "Create Report on Customer Feedback" },
+{ id: 30, text: "Review Customer Feedback Report" },
+{ id: 31, text: "Customer Feedback Report Analysis" },
+{ id: 32, text: "Prepare Shipping Cost Analysis Report" },
+{ id: 33, text: "Complete Shipper Selection Form" },
+{ id: 34, text: "Upgrade Server Hardware" },
+{ id: 35, text: "Upgrade Personal Computers" },
+{ id: 36, text: "Approve Personal Computer Upgrade Plan" },
+{ id: 37, text: "Estimate Time Required to Touch-Enable Apps" },
+{ id: 38, text: "Report on Tranistion to Touch-Based Apps" },
+{ id: 39, text: "Try New Touch-Enabled WinForms Apps" },
+{ id: 40, text: "Site Up-Time Report" },
+{ id: 41, text: "Review Site Up-Time Report" },
+{ id: 42, text: "Review Online Sales Report" },
+{ id: 43, text: "Determine New Online Marketing Strategy" },
+{ id: 44, text: "Submit New Website Design" },
+{ id: 45, text: "Create Icons for Website" },
+{ id: 46, text: "Review PSDs for New Website" },
+{ id: 47, text: "Create New Shopping Cart" },
+{ id: 48, text: "Launch New Website" },
+{ id: 49, text: "Update Customer Shipping Profiles" },
+{ id: 50, text: "Create New Shipping Return Labels" }];
+
+
+Ligne de nomenclature générée
+Code version
+Code filiale / agence
+Numéro de commande
+Numéro de ligne de commande
+Numéro de sous ligne de commande
+Code produit fini
+Squelette CAO
+Niveau article généré
+Type ligne de nomenclature générée
+Ligne de nomenclature "V" maî.c.prd gén.
+Ligne de nomenclature "V" usi.c.prd gén.
+Composant ou ss - nomenclature généré(e)
+Paramètre ?
+    Numéro de pièce
+Paramètre façade origine nomenclature ?
+    Paramètre origine façade généré ?
+        Position origine façade générée ?
+            Paramètre cps cai.origine nomenclature ?
+                Paramètre origine caisson généré ?
+                    Position origine cps caisson générée ?
+                        Paramètre usinage origine nomenclature ?
+                            Paramètre origine usinage généré ?
+                                Position origine usinage générée ?
+                                    Désignation                                       
+Quantité composant
+Quantité usinage
+Coût matière
+Coût main d"oeuvre & frais généraux               
+Coût machine
+Dimension X
+Dimension Y
+Dimension Z
+Code nomenclature cible
+Gamme technique produit
+Gamme technique matière
+Ancienne gamme technique matière
+Vitre / partie centrale
+Regroupement gamme usinage poignée
+Gamme fragile
+Réversibilité
+Orientation Juke Box
+Sous type de composant produit
+Sous type de composant CAO
+Sous ensemble
+Appartenance composant
+Appartenance usinage cible
+Appartenance usinage origine
+Article façade
+Ferrage composant
+Position façade H = Haut, B = bas, bl = autre
+Famille pièce façade
+Regroupement rubrique prix de revient
+Code equipement facade
+Identifiant composant
+Composant horizontale / verticale
+Composant monté
+Quantité étagéres par façade
+Coloris fini intérieur
+Coloris fini intérieur 2
+Coloris fini extérieur
+Coloris fini extérieur 2
+Sens du fil intérieur
+Sens du fil extérieur
+Matériau(revêtement) face intérieure
+Matériau(revêtement) face extérieure
+Ame composant
+Forme composant
+Article matière
+Type de construction porte
+Décor vitre
+Numéro du chant
+Recouvrement du chant
+Diamètre
+Type de caisson coulissant
+Type de coulisse
+Type de construction caisson coulissant
+Système de sortie du caisson coulissant
+Angle d"ouverture                                 
+Profondeur utile
+Position composant en hauteur
+Position composant en profondeur
+Position composant en largeur
+Coloris du chant 1
+Coloris du chant 2
+Coloris du chant 3
+Coloris du chant 4
+Coloris du chant 5
+Epaisseur du chant 1
+Epaisseur du chant 2
+Epaisseur du chant 3
+Epaisseur du chant 4
+Epaisseur du chant 5
+Forme composant chant 1
+Forme composant chant 2
+Forme composant chant 3
+Forme composant chant 4
+Forme composant chant 5
+Recouvrement du chant 1
+Recouvrement du chant 2
+Recouvrement du chant 3
+Recouvrement du chant 4
+Recouvrement du chant 5
+Type perçage 1(cps prd)
+Type perçage 2(cps prd)
+Type perçage 3(cps prd)
+Type perçage 4(cps prd)
+Type perçage 5(cps prd)
+Appartenance Colis
+Désignation CPSPRD CAO
+Pos.cps.X.CAO
+Pos.cps.Y.CAO
+Pos.cps.Z.CAO
+Rotation X.CAO
+Rotation Y.CAO
+Rotation Z.CAO
+Intervale de tolérance X positif(+)
+Intervale de tolérance Y positif(+)
+Intervale de tolérance Z positif(+)
+Intervale de tolérance X negatif(-)
+Intervale de tolérance Y negatif(-)
+Intervale de tolérance Z negatif(-)
+Intervale de Tolér.Equerrage positif(+)
+Intervale de Tolér.Equerrage negatif(-)
+Intervale de Tolér.Parrall.positif(+)
+Intervale de Tolér.Parrall.negatif(-)
+Flag usinage trouvé
+Flag matière trouvée
+Flag de MAJ CAO
+Identifiant d´accès / de mise à jour              

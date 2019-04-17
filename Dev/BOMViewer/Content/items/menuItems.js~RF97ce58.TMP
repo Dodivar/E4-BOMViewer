@@ -1,0 +1,53 @@
+﻿var menu = [{
+    id: "1",
+    name: "Accueil",
+    url: "Home/Index"
+},
+    id: "2",
+    name: "Visualisation",
+    url: 'Search/Index',
+    items: [{
+        id: "2_1,
+        name: "d'une commande",
+        items: [{
+            id: "2_1_1",
+            name: "AS400",
+            url: "Search/Recherche"
+        }, {
+            id: "2_1_2",
+            name: "3CAD"
+            }]
+    }, {
+        id: "2_2",
+        name: "d'un panel de commande",
+            url: "Search/Recherche"
+    }, {
+        id: "2_3",
+        name: "en mode comparatif",
+        url: "Compare/Index"
+    }]
+}, {
+    id: "3",
+        name: "Personnalisation",
+    url: "Custom/Index",
+    items: [{
+        id: "3_1",
+        name: "Utilisateur",
+        url: "Custom/UserSetting"
+    }, {
+        id: "3_2",
+        name: "Vue",
+        url: "Custom/Visualisation"
+    }]
+}, {
+    id: "4",
+    name: "Autre",
+    items: [{
+        id: "4_1",
+        name: "Autre Plus",
+        items: [{
+            id: "4_1_1",
+            name: "Autre"
+        }]
+    }]
+}];

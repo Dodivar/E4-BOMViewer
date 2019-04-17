@@ -1,0 +1,92 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+    
+    if (Layout == null)
+    {
+        Layout = "~/Views/Shared/ForPartialViews/SearchMaster.cshtml";
+    }
+}
+
+<h3>d'une commande</h3>
+
+<div ng-controller="searchRecherche" ng-init="getUserColor()" ng-cloak>
+
+    <form name="searchOrder" style="width:80%;">
+        <div class="dx-fieldset">
+
+            <div class="dx-field">
+                <div class="dx-field-label">Agence :</div>
+                <div class="dx-field-value">
+                    <div dx-radio-group="radioGroupAgency" ng-model="search.agency"></div>
+                </div>
+            </div>
+
+            <div class="dx-field">
+                <div class="dx-field-label">Librairie :</div>
+                <div class="dx-field">
+                    <div dx-radio-group="radioGroupLibrary" ng-model="search.library" value="Agency[0]"></div>
+                </div>
+            </div>
+
+            <div class="dx-field">
+                <div class="dx-field-label">N° de commande :</div>
+                <div class="dx-field-value">
+                    <div id="Order" dx-text-box="textBoxOrder" ng-model="search.order"></div>
+                </div>
+            </div>
+
+            <div class="dx-field">
+                <div class="dx-field-label">N° de ligne :</div>
+                <div class="dx-field-value">
+                    <div dx-text-box="textBoxLine" ng-model="search.line"></div>
+                </div>
+            </div>
+
+            <div class="dx-field">
+                <div class="dx-field-value" style="">
+                    <div dx-button="cancelButtonOptions" style="float:left;"></div>
+                    <div dx-button="applyButtonOptions"></div>
+                </div>
+            </div>
+
+            <div class="dx-field">
+                <div class="dx-field-label">Dernière commande recherchée : </div>
+                <div class="dx-field-value">
+                    <div dx-button="orderButtonOptions"></div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <div class="popup" dx-popup="popupOptions">
+        <div data-options="dx-popup: { title: 'selectedOrder' }">
+
+            <div class="dx-fieldset">
+                <div class="dx-fieldset-header">{{numberOrderVersion}} version disponible</div>
+                <p ng-if="withoutOrder">Importation de la commande {{withoutOrderMsg}}</p>
+
+                <div id="small-indicator" dx-load-indicator="{height: 20, width: 20}" ng-if="forLoadIndicator">
+                </div>
+
+                <div class="dx-field" ng-if="withOrder">
+                    <div id="fieldContainer" dx-lookup="lookupOptionsVersion">
+                    </div>
+                </div>
+
+
+                <!-- button -->
+                <div class="dx-field" ng-if="withOrder">
+                    <div class="dx-field-value">
+                        <div dx-button="versionButton"></div>
+                    </div>
+                    <br />
+                    <div class="dx-field-value">
+                        <div dx-button="importButton"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

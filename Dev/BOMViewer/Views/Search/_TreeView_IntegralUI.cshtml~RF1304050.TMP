@@ -1,0 +1,32 @@
+﻿@{
+    ViewBag.Title = "Tree View - IntegralUI";
+}
+
+<link rel="stylesheet" href="../../css/samples.css" />
+<link rel="stylesheet" href="../../css/integralui.css" />
+<link rel="stylesheet" href="../../css/integralui.treeview.css" />
+<link rel="stylesheet" href="../../css/themes/theme-flat-blue.css" id="theme" />
+
+
+<hr />
+
+<div class="content" ng-controller="integralUI">
+    <div class="feature">
+        <h2 class="feature-title">TreeView / Tree Lines</h2>
+        <div class="feature-content">
+            <iui-treeview name="{{treeName}}" class="directive" items="data" show-lines="showLines" indent="25"></iui-treeview>
+            <div class="control-panel">
+                <label><input type="checkbox" ng-click="toggleLines()" checked="checked" /> Show Lines</label><br />
+            </div>
+            <br style="clear:both;" />
+            <div class="feature-help">
+                <p><span class="initial-space"></span>In this sample you can show/hide tree lines in TreeView directive. By clicking on check box on the right, you can change the built-in properties:</p>
+                <ul class="feature-points">
+                    <li><span style="color:#c60d0d">showLines</span> - determines whether tree lines are visible</li>
+                </ul>
+                <p><span class="initial-space"></span>The appearance of expand boxes is also changed from arrows to plus/minus icons.</p>
+                <p><span class="initial-space"></span>This sample also has <span style="color:#c60d0d">indent</span> property set to 25, this increases the distance between items of different levels by 25 pixels.</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<div ng-controller="homeTreeView">
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.common.css" />
+
+    <div class="detailOrder" ng-cloak>
+        <span style="font-weight:bold; font-size:large;">
+            Bibliothèque : {{Library}}  <br />
+            N° de commande : {{Order}}  <br />
+            <span ng-if="Line">N° de ligne : {{Line}}</span>
+        </span>
+    </div>
+
+    <br /><hr />
+    <div class="dx-viewport">
+        <div class="form">
+            <div id="simple-treeview" dx-tree-view="treeViewOptions"></div>
+        </div>
+    </div>
+
+    <br /><hr />
+    <span ng-if="jsonFirstNomenclature" style="font-weight:bold; color:red;">DATA :</span>
+    <span ng-bind="jsonFirstNomenclature"></span>
+</div>
+

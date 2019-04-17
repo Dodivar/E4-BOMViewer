@@ -1,0 +1,208 @@
+﻿using BOMViewer.Models;
+using IBM.Data.DB2.iSeries;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Configuration;
+using System.Web.Helpers;
+using System.Web.Mvc;
+using System.Web.Routing;
+using System.Web.Script.Serialization;
+
+namespace BOMViewer.Controllers
+{
+    public class ApiController : Controller
+    {
+        private readonly string SqlCnxStr = WebConfigurationManager.ConnectionStrings["Pro-Cfg-SqlCnxStr"].ToString();
+        private readonly string AS400CnxStr = WebConfigurationManager.ConnectionStrings["AS400CnxStr"].ToString();
+
+        // GET: Api/...
+        [HttpGet] // Copy the order in DB_BOM_VIEWER from AS400
+        public long CopyOrderFromAS400(Recherche recherche)
+        {
+            SQLServerManager sql = new SQLServerManager(SqlCnxStr);    
+            long result = sql.SP_ImportOrderFromAS400(SqlCnxStr, recherche.Agency, recherche.Order, "MURPHY_CT", recherche.Library.ToUpper());        
+            
+            return result;
+        }
+      
+        [HttpGet] // Return the BOM of the order
+        public string GetNomenclatureLines (long idOrder)
+        {           
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string jsonOrder = SQL.SP_GetOrderComponents(SqlCnxStr, idOrder);
+
+            return jsonOrder;
+        }
+
+        [HttpGet] // To load the list options of the table targeted
+        public string GetPrimaryListOptions(string system, string library, string table, int line)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string primaryList = SQL.SP_GetPrimaryList(SqlCnxStr, system, library, table, line);
+
+            return primaryList;
+        }
+
+        [HttpGet] // Return the list of table 
+        public string GetTableList()
+        {
+            string SQLStatement = "SELECT SystemName, LibraryName, TableName FROM DB_BOM_VIEWER.dbo.TAB_Tables";
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+
+            DataTable TableOfTableList = SQL.GetData(SqlCnxStr, SQLStatement);
+
+            string tableList = SQL.ConvertDataTableToJsonString(SqlCnxStr, TableOfTableList);
+            return tableList;
+        }
+
+        [HttpGet] // To get the different type of line in the table
+        public string GetTypeLineOfTable(string tableName)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string primaryList = SQL.SP_GetTypeLineOfTable(SqlCnxStr, tableName);
+
+            return primaryList;
+        }
+
+        // TODO :: Paser en paramètre l'id de l'utilisateur pour séletionner les tables qu'il peut utiliser
+        [HttpGet] // Return the list of the table (that is accessible by the user)
+        public string GetViewList()
+        {
+            string SQLStatement = "SELECT ID_View, ViewName, ViewDesc FROM DB_BOM_VIEWER.dbo.TAB_Views WHERE ID_User IS NULL OR ID_User = 2";
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+
+            DataTable TableOfTableList = SQL.GetData(SqlCnxStr, SQLStatement);
+
+            string tableList = SQL.ConvertDataTableToJsonString(SqlCnxStr, TableOfTableList);
+            return tableList;
+        }
+
+        [HttpGet] //To take preference of the view with the Sub Level specified
+        public string GetPreferenceOfView(int idView, int idSubLevel)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string preferenceOfView = SQL.SP_GetPreferenceOfView(SqlCnxStr, idView, idSubLevel);
+
+            return preferenceOfView;
+        }
+
+        [HttpGet] //To take all preference of the view
+        public string GetPreferenceOfViewAll(int idView)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string preferenceOfView = SQL.SP_GetPreferenceOfViewAll(SqlCnxStr, idView);
+
+            return preferenceOfView;
+        }
+
+        [HttpGet] // To update options of a selected SubLevel of view
+        public bool UpdatePreferenceOfView(int idView, int idSubLevel, string[] listePrincipale, string[] listeSecondaire)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+
+            if (listePrincipale == null && listeSecondaire == null)
+            {
+                // Dans le cas où l'user décide de supprimer toutes les préf. d'un type de ligne spécifique (arbo + détail), on doit supprimer ici et non dans la SP car sinon on atteint pas le delete        
+                string SQLStatement = "DELETE [DB_BOM_VIEWER].[dbo].[TAB_ViewColumns] WHERE ID_View = " + idView + " AND ID_TableSubLevel = " + idSubLevel;
+                DataTable TableOfTableList = SQL.GetData(SqlCnxStr, SQLStatement);
+
+                return true;
+            }
+
+            string ListeP = "";
+            string ListeS = "";
+
+            if (listePrincipale != null)
+            {
+                foreach (string ele in listePrincipale)
+                {
+                    ListeP += ele + ", ";
+                }
+            }
+
+            if (listeSecondaire != null) 
+            {
+                    foreach (string ele in listeSecondaire)
+                    {
+                        ListeS += ele + ", ";
+                    }
+            }
+
+            return SQL.SP_UpdatePreferenceOfView(SqlCnxStr, idView, idSubLevel, ListeP, ListeS);
+        }
+
+        [HttpGet]// To update options of all the view
+        public bool UpdatePreferenceOfViewAll(int idView, string[] listePrincipale, string[] listeSecondaire)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+
+            if (listePrincipale == null && listeSecondaire == null)
+            {
+                // Dans le cas où l'user décide de supprimer toutes les préf. d'un type de ligne spécifique (arbo + détail), on doit supprimer ici et non dans la SP car sinon on atteint pas le delete        
+                string SQLStatement = "DELETE [DB_BOM_VIEWER].[dbo].[TAB_ViewColumns] WHERE ID_View = " + idView;
+                DataTable TableOfTableList = SQL.GetData(SqlCnxStr, SQLStatement);
+
+                return true;
+            }
+
+            string ListeP = "";
+            string ListeS = "";
+
+            if (listePrincipale != null)
+            {
+                foreach (string ele in listePrincipale)
+                {
+                    ListeP += ele + ", ";
+                }
+
+                ListeP.Remove(ListeP.Length - 2, 2);
+            }
+
+            if (listeSecondaire != null)
+            {
+                foreach (string ele in listeSecondaire)
+                {
+                    ListeS += ele + ", ";
+                }
+
+                ListeS.Remove(ListeS.Length - 2, 2);
+            }
+
+            return SQL.SP_UpdatePreferenceOfViewAll(SqlCnxStr, idView, ListeP, ListeS);
+        }
+
+        [HttpGet]// Return all the Sub levels of all table
+        public string GetTableSubLevels()
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string lineList = SQL.SP_GetTableSubLevels(SqlCnxStr);
+
+            return lineList;
+        }
+
+        [HttpGet]// Load every data of the order specified with the configuration of the current view
+        public string GetCustomJsonOrder(int idOrder, int idView)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string JsonTreeview = SQL.SP_GetCustomJsonOrder(SqlCnxStr, idOrder, idView);
+
+            return JsonTreeview;
+        }
+
+
+        [HttpGet]// Load every data of the order specified with the configuration of the current view
+        public string getOrderVersion(string OrderAgence, int OrderNumber)
+        {
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+            string JsonTreeview = SQL.SP_GetOrderVersion(SqlCnxStr, OrderAgence, OrderNumber);
+
+            return JsonTreeview;
+        }
+
+    }
+
+}

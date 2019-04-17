@@ -1,0 +1,10 @@
+﻿@{
+    ViewBag.Title = "Affichage de la commande";
+}
+
+<h2>Affichage</h2>
+<div class="dx-viewport demo-container" ng-controller="DemoController">
+    <div class="form">
+        <div id="simple-treeview" dx-tree-view="treeViewOptions"></div>
+    </div>
+</div>

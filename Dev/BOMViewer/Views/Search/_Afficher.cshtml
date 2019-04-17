@@ -1,0 +1,206 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<div ng-controller="searchTreeView" ng-init="init()" ng-cloak>
+    <div class="row">
+
+        <div class="col-md-3" style="min-height:80vh;">
+
+            <div id="info-order">
+                <!-- Version Order<span ng-if="{{orderData.version}}">(V{{orderData.version}})</span>-->
+                <div class="title">
+
+                    <!-- <h2>Bibliothèque : {{orderData.library}}</h2> -->
+                    <div ng-if="!decompo">
+                        <h2 style="color: #B92B40;">N° de commande : {{orderData.agencyText}} - {{orderData.orderNumber}}</h2>
+
+                        <div ng-if="orderData.line.length">
+                            <p style="color: #CEA54A; font-size:1.2em; word-wrap: break-word;">
+                                (<strong>{{linesToDisplay}}</strong>)
+                            </p>
+                        </div>
+                    </div>
+
+                    <div ng-if="decompo">
+                        <h1>
+                            Décomposition Interactive : {{tableDecompoInt}}
+                        </h1>
+                    </div>
+                </div>               
+
+                <!-- OPTIONS -->
+                <div class="dx-field">
+                    <div class="dx-field-label">Afficher l'info-bulle</div>
+                    <div class="dx-field-value">
+                        <div dx-check-box="checkBoxToolTip"></div>
+                    </div>
+                    <div class="dx-field-label">Afficher la zone détail</div>
+                    <div class="dx-field-value">
+                        <div dx-check-box="checkBoxDetailZone"></div>
+                    </div>
+                </div>                
+
+                <div dx-lookup="familyFontTreeView"></div>
+                <br />
+                <div dx-slider="slider.fontSize"></div>
+                <br />
+                <div dx-slider="slider.margin"></div>
+                <br />
+
+                <section class="filter_line">
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">CDENT</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="CDENT" data-line="C"><p>C</p></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">CDLGN</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="CDLGN" data-line="A">
+                                <p>A</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">NGCPP</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="NGCPP" data-line="P"><p>P</p></div>
+                            <div class="line" data-table="NGCPP" data-line="N"><p>N</p></div>
+                            <div class="line" data-table="NGCPP" data-line="V"><p>V</p></div>
+                            <div class="line" data-table="NGCPP" data-line="U"><p>U</p></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">NGMAT</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="NGMAT" data-line="P"><p>P</p></div>
+                            <div class="line" data-table="NGMAT" data-line="N"><p>N</p></div>
+                            <div class="line" data-table="NGMAT" data-line="G"><p>G</p></div>
+                            <div class="line" data-table="NGMAT" data-line="I"><p>I</p></div>
+                            <div class="line" data-table="NGMAT" data-line="F"><p>F</p></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">NGUSI</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="NGUSI" data-line="P"><p>P</p></div>
+                            <div class="line" data-table="NGUSI" data-line="N"><p>N</p></div>
+                            <div class="line" data-table="NGUSI" data-line="S"><p>S</p></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">NGFAB</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="NGFAB" data-line="P"><p>P</p></div>
+                            <div class="line" data-table="NGFAB" data-line="N"><p>N</p></div>
+                            <div class="line" data-table="NGFAB" data-line="O"><p>O</p></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">NGINF</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="NGINF" data-line="I"><p>I</p></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">NGPDC</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="NGPDC" data-line="P"><p>P</p></div>
+                            <div class="line" data-table="NGPDC" data-line="N"><p>N</p></div>
+                            <div class="line" data-table="NGPDC" data-line="W"><p>W</p></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">NGIPR</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="NGIPR" data-line="P"><p>P</p></div>
+                            <div class="line" data-table="NGIPR" data-line="N"><p>N</p></div>
+                            <div class="line" data-table="NGIPR" data-line="I"><p>I</p></div>
+                            <div class="line" data-table="NGIPR" data-line="L"><p>L</p></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="tables">
+                            <p class="table">NGFMC</p>
+                        </div>
+                        <div class="lines">
+                            <div class="line" data-table="NGFMC" data-line="FMC"><p>FMC</p></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- WIDGET DX LOOKUP LIST VERSION OF ORDER
+    <div class="dx-field-label">Numéro de version :</div>
+    <div class="dx-field-value">
+        <div dx-lookup="lookupOptionsVersion"></div>
+    </div>
+    -->
+
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6" style="border-right: 1px solid red">
+            <div class="dx-viewport" id="treeview">
+                <h3>{{TVerror}}</h3>
+
+                <div id="small-indicator" dx-load-indicator="{height: 100, width: 100}" ng-if="loadingIndicator">
+                </div>
+
+                <div id="simple-treeview" dx-tree-view="treeView" style="font-size:{{fontSizeTreeView}}px; font-family:{{fontFamilyTreeView}};">
+                </div>
+
+                <div dx-tooltip="toolTip" id="toolTip">
+                    <p id="toolTipText"></p> <!-- Fill by innerHTML in js code -->
+                </div>
+
+                <div dx-context-menu="contextMenuTreeview"></div>
+
+                <div dx-color-box="colorBox" id="colorBoxModifyColor"></div>
+            </div>
+        </div>
+
+        <div dx-resizable="zoneDetail" id="zone-detail" ng-if="detailZoneVisible">
+
+            <div dx-scroll-view="zoneScroll" id="scrollview" style="font-size:{{fontSizeDetail}}px">
+                <p id="zone-detail-text"></p> <!-- Fill by innerHTML in js code -->
+            </div>
+
+            <div id="font-size">
+                <button class="btnFontSize" ng-click="increaseFont()">+</button>
+                <button class="btnFontSize" ng-click="decreaseFont()">-</button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@*
+    @section scripts {
+    <script type="text/javascript" src="~/SG/scripts/App/line_filter_treeview.js"></script>
+    }
+*@
+
+

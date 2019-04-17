@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<div ng-controller="searchTreeView">
+
+    <div class="detailOrder">        
+        <p style="font-weight:bold;">
+            Bibliothèque : {{Library}}  <br />
+            N° de commande : {{Agency}} - {{Order}}<br />
+            <span ng-if="Line">N° de ligne : {{Line}}</span>
+        </p>        
+    </div>
+
+    <hr />
+    <div class="dx-viewport" style="width:30%;">
+
+        <div id="simple-treeview" dx-tree-view="treeView">
+        </div>
+
+        <div dx-tooltip="toolTip">
+            <p>{{toolTipOfNodeText}}</p>
+        </div>
+
+
+    </div>
+
+
+    <div dx-resizable="zoneDetail" id="zoneDetail">
+        <p style="font-size:8px">{{DetailLineData}}</p>
+    </div>
+
+    <br />
+</div>
+

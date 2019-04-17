@@ -1,0 +1,349 @@
+﻿'use strict';
+
+angular.module('BOMViewer')
+    .controller('customVisualisation', customVisualisation)
+    .controller('customVisualisationColorbox', customVisualisationColorbox)
+    .controller('customVisualisationList', customVisualisationList);
+
+// Injection des dépendances des contrôleurs
+customVisualisation.$inject = ['$scope', '$location', '$http'];
+customVisualisationColorbox.$inject = ['$scope', '$location', '$localStorage'];
+customVisualisationList.$inject = ['$scope', '$http'];
+
+
+function customVisualisation($scope, $location, $http) {
+    // Accordion
+    $scope.animationDuration = 300;
+    $scope.collapsible = true;
+    $scope.multiple = true;
+    $scope.selectedItems = false; // No one will be expanded by default
+
+    $scope.accordionOptions = {
+        dataSource: accordionItems,
+        itemTemplate: "customer",
+        bindingOptions: {
+            animationDuration: "animationDuration",
+            collapsible: "collapsible",
+            multiple: "multiple",
+            selectedItems: "selectedItems"
+        }
+    };
+
+    // Button
+    $scope.applyButtonOptions = {
+        text: "Sauvegarder",
+        type: "success",
+        width: 150,
+        onClick: function (e) {
+            //location.replace('Custom/Visualisation');
+
+            //To modifidy preference of the selected View
+            $http({
+                url: 'Api/PostPreferenceView',
+                method: 'GET',
+                params: {
+                    listPrincipal: e.selectedItemsPrincipal,
+                    listDetail: e.selectedItemsDetail
+                }
+            }).then(function (response) {
+                console.log(response.data);
+                DevExpress.ui.notify("Configuration sauvegardé !");
+
+            }), function (response) {
+                console.log(response);
+                alert(reponse);
+                DevExpress.ui.error("Erreur dans la sauvegarde de la configuration !");
+            };
+
+
+        }
+    };
+
+
+    $http({
+        url: 'Api/GetTableList',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.result = response.data;
+        console.log($scope.result);
+        $scope.listeOfView = {
+        }
+
+        $scope.lookupOptions = {
+            items: $scope.result,
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une table",
+            displayExpr: "TableName",
+            onItemClick: function (e) {
+            }
+
+
+
+
+        })
+, function (response) {
+                console.log(response);
+                alert(reponse);
+            };
+    
+}
+
+
+
+// COLOR BOX \\
+function customVisualisationColorbox($scope, $location, $localStorage) {
+
+    $scope.$storage = $localStorage.$default({
+        bool: false
+    });
+
+    console.log($scope.$storage.bool);
+    var applyButton = "Valider";
+    var cancelButton = "Annuler";
+
+    $scope.colorBox = {
+        Ligne: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "N° de Ligne",
+            lib: "Ligne"
+        },
+        Colis: {
+            value: "#ff9900",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "N° de Colis",
+            lib: "Colis"
+        },
+        Pere: {
+            value: "#ffee00",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Père (P)",
+            lib: "Pere"
+        },
+        NomenclatureFils: {
+            value: "#8cff00",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Nomenclature Fils (N)",
+            lib: "NomenclatureFils"
+        },
+        Virtuelle: {
+            value: "#00a627",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Virtuelle (V)",
+            lib: "Virtuelle"
+        },
+        Usinage: {
+            value: "#00ffcc",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Usinage (U)",
+            lib: "Usinage"
+        },
+        EtapeUsi: {
+            value: "#0004ff",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Etape Usinage (S)",
+            lib: "EtapeUsi"
+        },
+        MatiereGen: {
+            value: "#A2F6E8",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Matière générée (G)",
+            lib: "MatiereGen"
+        },
+        IPM: {
+            value: "#00028c",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Infos Processus Matière (I)",
+            lib: "IPM"
+        },
+        Fabrication: {
+            value: "#c400ff",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Fabrication (F)",
+            lib: "Fabrication"
+        },
+        GammeOpe: {
+            value: "#864899",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Gamme d'opération (O)",
+            lib: "GammeOpe"
+        },
+        PDC: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Poste De Charge (W)",
+            lib: "PDC"
+        },
+        InfosProcPDC: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Infos Processus PDC (I)",
+            lib: "InfosProcPDC"
+        },
+        LigneColis: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Ligne colis (L)",
+            lib: "LigneColis"
+        }
+    };
+
+    var tmp; // For checkbox text
+    if ($scope.$storage.bool) {
+        tmp = "désactiver";
+    } else tmp = "activer";
+
+    // To enable "editAlphaChannel" for colorBox
+    $scope.checkBox = {
+        forAlphaChannel: {
+            bindingOptions: {
+                value: $scope.$storage.bool
+            },
+            text: "Cliquer pour " + tmp  + " la transparence",
+            value: $scope.$storage.bool
+        }
+    };
+
+    $scope.reload = function ($location) {        
+        $scope.$storage.bool = !$scope.$storage.bool;
+        console.log($scope.$storage.bool);
+        location.replace('Custom/Visualisation');
+    };
+}
+
+
+
+// LIST \\
+function customVisualisationList($scope, $http) {
+
+    $scope.selectedItemsPrincipal = [];
+    $scope.selectedItemsDetail = [];
+    $scope.selectAllMode = "allPages";
+    $scope.selectionMode = "multiple";
+
+
+    $http({
+        url: 'Api/GetTableList',
+        method: 'GET'
+    }).then(function (response) {
+        $scope.result = response.data;
+        console.log($scope.result);
+
+        $scope.lookupOptions = {
+            items: $scope.result,           
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une table",
+            displayExpr: "TableName",
+            onItemClick: function (e) {
+                console.log(e.itemData.TableName);
+                $scope.toDisplay = true; 
+
+                //For Principale List
+                $http({
+                    url: 'Api/GetPrimaryListOptions',
+                    method: 'GET',
+                    params: {
+                        system: e.itemData.SystemName,
+                        library: e.itemData.LibraryName,
+                        table: e.itemData.TableName
+                    }
+                }).then(function (response) {
+                    $scope.primaryList = response.data;
+                    console.log($scope.primaryList);
+                    var arraySum1 = [];
+                    var arraySum2 = [];
+
+
+                    $scope.listOptionsPrincipale = {
+                        height: 600,
+                        bindingOptions: {
+                            selectionMode: "selectionMode",
+                            dataSource: "primaryList",
+                            selectedItemKeys: "selectedItemsPrincipal"
+                        },
+                        showSelectionControls: true,
+                        searchEnabled: true,
+                        searchMode: "contains",
+                        searchExpr: ['ColumnName', 'ColumnDesc'],
+
+                        /*
+                        //IL FAUT BindingOptions le datasource étant groupé par type de ligne, mais pb de refresh lorsqu'on change de table
+                        grouped: true,
+                        collapsibleGroups: true,
+                        group: 'key',
+                        groupTemplate: function (data) {
+                            return $("<div>Type de ligne : " + data.key + "</div>");
+                        },*/
+
+                        onItemClick: function (item) {
+                            //var sum1 = item.itemData.ID_Column + "_" + item.itemData.ID_TableSubLevel;
+                            console.log($scope.selectedItemsPrincipal);
+
+                        }
+                    };
+
+                    $scope.listOptionsSecondaire = {
+                        height: 600,
+                        bindingOptions: {
+                            selectionMode: "selectionMode",
+                            dataSource: "primaryList",
+                            selectedItemKeys: "selectedItemsDetail"
+                        },
+                        showSelectionControls: true,
+                        searchEnabled: true,
+                        searchMode: "contains",
+                        searchExpr: ['ColumnName', 'ColumnDesc'],
+
+                        onItemClick: function (item) {
+                            //var sum2 = item.itemData.ID_Column + "_" + item.itemData.ID_TableSubLevel;
+                            console.log($scope.selectedItemsDetail);
+                        }
+                    };
+
+
+
+                }), function (response) {
+                    console.log(response);
+                    alert(reponse);
+                };
+            }
+        };
+        }), function (response) {
+            console.log(response);
+            alert(reponse);
+        };
+
+
+
+
+}

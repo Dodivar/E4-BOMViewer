@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+    
+    if (Layout == null)
+    {
+        Layout = "~/Views/Shared/ForPartialViews/HomeMaster.cshtml";
+    }
+}
+
+<style>
+    /*  for angularJS element  */
+    input.ng-invalid {
+        background-color: lightgray;
+    }
+</style>
+
+<h3>d'une commande</h3>
+<div class="jumbotron" ng-controller="homeRecherche" ng-init="getUserColor()">
+
+    <form name="Search" novalidate>
+        <p>
+            Agence :
+            <label ng-repeat="agence in Agency" id="{{agence.Lib}}">
+                {{agence.Lib}}
+                <input type="radio" name="filiale" id="{{agence.Lib}}" value="{{agence.Age}}" ng-model="Agency.Age" />
+                <br />
+            </label>
+            <br />
+        </p>
+
+
+        <p>
+            Bibliothèque :
+            <select name="listBib" ng-model="selectedLibrary" ng-options="x.Lib for x in Library" autofocus required></select>
+        </p>
+
+        <p>
+            N° Commande :
+            <input name="Order" type="text" ng-model="selectedOrder" ng-minlength="9" ng-maxlength="9" placeholder="Commande" required />
+            <span class="text-danger" ng-show="Search.Order.$error.minlength||Search.Order.$error.maxlength">
+                Le numéro de commande doit contenir 9 caractères
+            </span>
+        </p>
+
+        <p>
+            N° Ligne :
+            <input type="text" ng-model="selectedLine" ng-minlength="2" ng-maxlength="3" placeholder="N° ligne" />
+        </p>
+
+        <button ng-click="getNumberOrderVersion()" ng-disabled="Search.listBib.$pristine||Search.Order.$pristine||Search.Order.$error.minlength||Search.Order.$error.maxlength">Rechercher</button>
+        <button ng-click="reset()">Reset</button>
+
+
+        <div class="popup" dx-popup="popupOptions">
+            <div data-options="dxTemplate: { name: 'title' }">
+
+                <div class="dx-fieldset">
+                    <div class="dx-fieldset-header">{{numberOrderVersion}} version disponible</div>
+                    <p ng-if="withoutOrder">Importation de la commande {{withoutOrderMsg}}</p>
+
+                    <div id="small-indicator" dx-load-indicator="{
+        	        height: 20,
+        	        width: 20
+        	        }" ng-if="forLoadIndicator"></div>
+
+                    <div class="dx-field" ng-if="withOrder">
+                        <div dx-lookup="lookupOptionsVersion">
+                        </div>
+                    </div>
+
+                    <div class="dx-field" ng-if="withOrder">
+                        <div class="dx-field-value">
+                            <div dx-button="applyButton"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </form>
+</div>

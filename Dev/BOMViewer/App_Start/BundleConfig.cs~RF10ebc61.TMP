@@ -1,0 +1,54 @@
+﻿using System.Web;
+using System.Web.Optimization;
+
+namespace BOMViewer
+{
+    public class BundleConfig
+    {
+        // Pour plus d'informations sur le regroupement, visitez https://go.microsoft.com/fwlink/?LinkId=301862
+        public static void RegisterBundles(BundleCollection bundles)
+        {
+            bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
+                        "~/Scripts/jquery-{version}.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
+                        "~/Scripts/jquery.validate*"));
+
+            // Utilisez la version de développement de Modernizr pour le développement et l'apprentissage. Puis, une fois
+            // prêt pour la production, utilisez l'outil de génération à l'adresse https://modernizr.com pour sélectionner uniquement les tests dont vous avez besoin.
+            bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
+                        "~/Scripts/modernizr-*"));
+
+            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
+                      "~/Scripts/bootstrap.min.js"));
+
+            bundles.Add(new StyleBundle("~/Content/css").Include(
+                      "~/Content/bootstrap.css",
+                      "~/Content/site.css"));
+
+
+            // Ajout des scripts Angular
+            bundles.Add(new ScriptBundle("~/bundles/angular").Include(
+                    "~/Scripts/angular.min.js",
+                    "~/Scripts/angular-resource.min.js",
+                    "~/Scripts/angular-route.min.js",
+                    "~/Scripts/ngStorage.min.js"));
+
+
+            // Ajout des scripts perso /*
+            bundles.Add(new ScriptBundle("~/bundles/DevExpress")
+                    .Include("~/SG/scripts/Vendor/dx.all.js")); // For DevExpress dependencies ('dx')                    
+
+
+            // Ajout des scripts perso 
+            bundles.Add(new ScriptBundle("~/bundles/BOMViewer")                 
+                    .IncludeDirectory("~/Directives/", "*.js", true)
+                    .IncludeDirectory("~/ControllerJs/", "*.js", true));
+
+
+            // Ajout des styles pour les composants [DevExpress (qu'un pour le moment)] (TreeView, Accordion, ...)
+            bundles.Add(new StyleBundle("~/styles/Vendor/css")
+                .IncludeDirectory("~/SG/styles/Vendor/", "*.css", true));
+        }
+    }
+}

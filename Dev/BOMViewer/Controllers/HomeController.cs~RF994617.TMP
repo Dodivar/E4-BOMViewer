@@ -1,0 +1,59 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Configuration;
+using System.Web.Helpers;
+using System.Web.Mvc;
+using BOMViewer.Models;
+
+namespace BOMViewer.Controllers
+{
+    public class HomeController : Controller
+    {
+        private string SqlCnxStr = WebConfigurationManager.ConnectionStrings["Pro-Cfg-SqlCnxStr"].ToString();
+        private string AS400CnxStr = WebConfigurationManager.ConnectionStrings["AS400CnxStr"].ToString();
+
+
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        public ActionResult Recherche()
+        {
+            return PartialView("_Recherche");
+        }
+
+        public ActionResult Personnalisation()
+        {
+            return PartialView("_Personnalisation");
+        }
+
+        public ActionResult Treeview()
+        {
+            return View("_Afficher_Dx");
+        }
+
+        [HttpGet]
+        public ActionResult GetOrderInTreeView(Recherche recherche)
+        {
+            ViewData["Order"] = recherche.Commande;
+            ViewData["OrderLine"] = recherche.Ligne;
+            ViewData["Bib"] = recherche.Bibliothèque;
+
+            string SQLStatement = "";
+            string jsonOrder = "";
+
+            SQLStatement = "select OrderHeaderJSON from DB_BOM_VIEWER.[dbo].TAB_ORDERS where OrderNumberAS400 = " + recherche.Commande;
+
+            SQLServerManager sql = new SQLServerManager(SqlCnxStr);
+            jsonOrder = sql.ImportJsonFromDbViewer(SqlCnxStr, recherche.Commande);
+
+            ViewData["JSON"] = jsonOrder;
+
+            return View("_Afficher_dx");
+        }
+    }
+}

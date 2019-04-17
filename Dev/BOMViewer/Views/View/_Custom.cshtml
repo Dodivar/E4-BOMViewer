@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Title = "Custom Visualisation";       
+    Layout = "~/Views/Shared/_Layout.cshtml";    
+}
+
+
+<div class="title col-sm-12">
+    <h1>Customisation d'une vue</h1>
+</div>
+<hr/>
+
+<div class="dx-viewport" ng-controller="customView" ng-cloak style="min-height:60vh;">
+
+    <h2>{{view.name}}</h2>
+    <br />
+    <p><strong>{{view.desc}}</strong></p>
+    <hr />
+    <br />
+
+    <div class="filtrage_des_lignes" style="position:fixed; left:70%;">
+        <h1>Filtrage des lignes</h1>
+        @Html.Partial("~/Views/View/_Line.cshtml")
+
+        <div class="dx-field" style="padding-top: 50px;">
+            <div class="dx-field-value">
+                <div dx-button="applyButtonOptions"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="affichage_des_champs" style="width:60%;">
+        <h1>Affichage des champs</h1>
+        @Html.Partial("~/Views/View/_Field.cshtml")
+    </div>
+
+
+
+
+        <!--
+    <div ng-if="categorie.Field === 'Accès à la vue'">
+        @Html.Partial("~/Views/View/visualisationAccordion/_Share.cshtml")
+    </div>
+        -->
+
+
+        <br />
+
+
+
+    <!-- BUTTON -->
+    <div class="button_view">
+        <!--
+        <div class="dx-field">
+            <div class="dx-field-value">
+                <div dx-button="cancelButtonOptions"></div>
+            </div>
+        </div>
+    -->
+
+
+    </div>
+</div>
+

@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<style>
+    /*  for angularJS element  */
+    input.ng-invalid {
+        background-color: lightgray;
+    }
+</style>
+
+<h2>Recherche</h2>
+<div class="jumbotron" ng-controller="Form">
+
+    <form name="Search" novalidate>
+        <p>
+            Bibliothèque :
+            <select name="listBib" ng-model="selectedBib" ng-options="x.bib for x in bibliotheque" required></select> {{selectedBib.id}}
+        </p>
+
+        <p>
+            Table :
+            <input name="Order" type="text" ng-model="selectedOrder" ng-minlength="9" placeholder="Commande" required />
+            <span class="text-danger" ng-show="Search.Order.$error.minlength">
+                Une commande doit contenir au minimum 9 caractères
+            </span>
+        </p>
+
+        <p>
+            Ligne :
+            <input type="text" ng-model="selectedLine" ng-minlength="2" ng-maxlength="3" placeholder="N° ligne" />
+        </p>
+
+        <button ng-click="Display(); isVisible = true" ng-disabled="Search.listBib.$pristine||Search.Order.$pristine||Search.Order.$error.minlength">Submit</button>
+        <button ng-click="reset()">Reset</button>
+
+        <h5 ng-show="isVisible">Resultat de la requête :</h5>
+        <span ng-bind="resultAS400"></span>
+
+    </form>
+</div>

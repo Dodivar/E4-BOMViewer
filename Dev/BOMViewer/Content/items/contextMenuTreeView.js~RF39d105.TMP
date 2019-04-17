@@ -1,0 +1,17 @@
+﻿var ContextMenuTreeViewItems = [
+
+    { text: 'Ouvrir le noeud', icon: '001-expand.png'},
+    { text: 'Fermer le noeud', icon: '002-collapse.png' },
+    { text: 'Nouvelle recherche', icon: '004-file.png'  },
+    {
+        text: 'Exporter',
+        icon: '003-share.png',
+        items: [
+            { text: 'JPG' },
+            { text: 'PNG' },
+            { text: 'XLS' },
+            { text: 'HTML' }
+        ]
+    }    
+];
+

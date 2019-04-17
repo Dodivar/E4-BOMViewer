@@ -1,0 +1,35 @@
+﻿
+@{
+    ViewBag.Title = "Page recherche";
+}
+<div class="jumbotron" ng-controller="Form">
+    {{essai}}
+    <form>
+
+        Bibliothèque :
+        <select ng-model="selectedBib1">
+            <option ng-repeat="bib in bibliotheque" value="{{bib.id}}">{{bib.bib}}</option>
+        </select>
+        {{selectedBib1}}
+
+
+        <select ng-model="selectedBib" ng-options="x.id for x in bibliotheque"></select>
+
+        {{selectedBib.id}}
+        <h1>{{selectedBib.bib}}</h1>
+
+
+
+        <br />
+        Table : <input type="text" ng-model="selectedTable" placeholder="Table" />
+        {{selectedTable}}
+        <br /><br />
+
+        <button ng-click="reset()">RESET</button>
+        <button ng-click="">SUBMIT</button>
+    </form>
+
+ 
+    
+</div>
+

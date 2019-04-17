@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewBag.Title = "Page recherche";
+}
+<div class="jumbotron" ng-controller="Form">
+    <form name="Search">
+
+        Bibliothèque :
+        <select name="listBib" ng-model="selectedBib" ng-options="x.bib for x in bibliotheque" required></select>
+
+        <h3>{{selectedBib.bib}}</h3>
+        <h3>{{selectedBib.id}}</h3>
+
+
+
+        <br />
+        <p>
+            Table : <input name="Order" type="text" ng-model="selectedOrder" placeholder="Commande" required />
+            {{selectedOrder}}
+
+                    <span style="color:red" ng-show="Form.Order.$dirty && Form.Order.$invalid">
+                        <span ng-show="Form.Order.$error.required">N° de Commande est requis.</span>
+                    </span>
+        </p>
+        <br />
+
+
+        <br />
+        Table : <input type="text" ng-model="selectedLine" placeholder="N° ligne" />
+        {{selectedTable}}
+        <br />
+
+
+        <button ng-click="reset()">RESET</button>
+        <p>
+            <input type="submit" ng-disabled="Search.listBib.$pristine||Search.Order.$pristine && Search.Order.$invalid">
+        </p>
+
+    </form>
+
+ 
+    
+</div>
+

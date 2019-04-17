@@ -1,0 +1,239 @@
+﻿'use strict';
+
+angular.module('BOMViewer')
+    .controller('CutomUserSetting', CutomUserSetting)
+    .controller('CutomUserSettingColorBox', CutomUserSettingColorBox)
+
+    .service('sharedPropertiesColor', function () {
+        var listeP;
+        var listeS;
+        var listeDefaultP;
+        var listeDefaultS;
+        var idTypeLine;
+
+        return {
+            getListeP: function () {
+                return listeP;
+            },
+            getListeS: function () {
+                return listeS;
+            },
+            getListeDefaultP: function () { // Liste principale lors du chargement de la vue
+                return listeDefaultP;
+            },
+            getListeDefaultS: function () {// Liste détail lors du chargement de la vue
+                return listeDefaultS;
+            },
+            getIdTypeLine: function () {
+                return idTypeLine;
+            },
+            setListeP: function (value) {
+                listeP = value;
+            },
+            setListeS: function (value) {
+                listeS = value;
+            },
+            setListeDefaultP: function (value) {
+                listeDefaultP = value;
+            },
+            setListeDefaultS: function (value) {
+                listeDefaultS = value;
+            },
+            setIdTypeLine: function (value) {
+                idTypeLine = value;
+            }
+
+        };
+    });
+
+CutomUserSetting.$inject = ['$scope', '$location', '$http', 'sharedPropertiesColor'];
+CutomUserSettingColorBox.$inject = ['$scope', '$location', '$http', 'sharedPropertiesColor'];
+
+
+function CutomUserSetting($scope, $location, $http, sharedPropertiesColor) {
+
+    // Widget Bouton
+    $scope.applyButtonOptions = {
+        text: "Sauvegarder",
+        type: "success",
+        width: 150,       
+        onClick: function (e) {
+        }
+    };
+
+    $scope.cancelButtonOptions = {
+        text: "Annuler",
+        type: "danger",
+        width: 100,        
+        onClick: function (e) {           
+        }
+    };
+}
+
+
+// COLOR BOX \\        
+function CutomUserSettingColorBox($scope, $location, $http, sharedPropertiesColor) {
+
+    $scope.$storage = $localStorage.$default({
+        bool: false
+    });
+
+    console.log($scope.$storage.bool);
+    var applyButton = "Valider";
+    var cancelButton = "Annuler";
+
+    $scope.ColorValue = {
+        Ligne: "#f05b41",
+        Colis: "#f05b41",
+        Pere: "#f05b41",
+        Fils: "#f05b41",
+        Virtuelle: "#f05b41",
+        Usinage: "#f05b41",
+        EtapeUsi: "#f05b41",
+        MatiereGen: "#f05b41",
+        IPM: "#f05b41",
+        Fabrication: "#f05b41",
+        GammeOpe: "#f05b41",
+        PDC: "#f05b41",
+        InfpsProcPDC: "#f05b41",
+        LigneColis: "#f05b41"
+    };
+
+
+    $scope.colorBox = {
+        Ligne: {
+            value: "#f05b41",
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "N° de Ligne",
+            lib: "Ligne"
+        },
+        Colis: {
+            value: $scope.ColorValue.Ligne,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "N° de Colis",
+            lib: "Colis"
+        },
+        Pere: {
+            value: $scope.ColorValue.Pere,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Père (P)",
+            lib: "Pere"
+        },
+        NomenclatureFils: {
+            value: $scope.ColorValue.Fils,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Nomenclature Fils (N)",
+            lib: "NomenclatureFils"
+        },
+        Virtuelle: {
+            value: $scope.ColorValue.Virtuelle,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Virtuelle (V)",
+            lib: "Virtuelle"
+        },
+        Usinage: {
+            value: $scope.ColorValue.Usinage,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Usinage (U)",
+            lib: "Usinage"
+        },
+        EtapeUsi: {
+            value: $scope.ColorValue.EtapeUsi,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Etape Usinage (S)",
+            lib: "EtapeUsi"
+        },
+        MatiereGen: {
+            value: $scope.ColorValue.MatiereGen,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Matière générée (G)",
+            lib: "MatiereGen"
+        },
+        IPM: {
+            value: $scope.ColorValue.IPM,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Infos Processus Matière (I)",
+            lib: "IPM"
+        },
+        Fabrication: {
+            value: $scope.ColorValue.Fabrication,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Fabrication (F)",
+            lib: "Fabrication"
+        },
+        GammeOpe: {
+            value: $scope.ColorValue.GammeOpe,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Gamme d'opération (O)",
+            lib: "GammeOpe"
+        },
+        PDC: {
+            value: $scope.ColorValue.PDC,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Poste De Charge (W)",
+            lib: "PDC"
+        },
+        InfosProcPDC: {
+            value: $scope.ColorValue.InfosProcPDC,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Infos Processus PDC (I)",
+            lib: "InfosProcPDC"
+        },
+        LigneColis: {
+            value: $scope.ColorValue.LigneColis,
+            applyButtonText: applyButton,
+            cancelButtonText: cancelButton,
+            editAlphaChannel: $scope.$storage.bool,
+            text: "Ligne colis (L)",
+            lib: "LigneColis"
+        }
+    };
+
+    var tmp; // For checkbox text
+    if ($scope.$storage.bool) {
+        tmp = "désactiver";
+    } else tmp = "activer";
+
+    // To enable "editAlphaChannel" for colorBox
+    $scope.checkBox = {
+        forAlphaChannel: {
+            bindingOptions: {
+                value: $scope.$storage.bool
+            },
+            text: "Cliquer pour " + tmp + " la transparence",
+            value: $scope.$storage.bool
+        }
+    };
+
+    $scope.reload = function ($location) {
+        $scope.$storage.bool = !$scope.$storage.bool;
+        console.log($scope.$storage.bool);
+        location.replace('Custom/Interface');
+    };
+}

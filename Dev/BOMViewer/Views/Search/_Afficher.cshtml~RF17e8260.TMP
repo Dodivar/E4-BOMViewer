@@ -1,0 +1,84 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<div ng-controller="searchTreeView" ng-cloak>
+
+    <div class="detailOrder">
+        <p style="font-weight:bold;">
+            Bibliothèque : {{Library}}  <br />
+            N° de commande : {{Agency}} - {{Order}}<br />
+            <span ng-if="Line">N° de ligne : {{Line}}</span>
+        </p>
+    </div>
+
+
+    <div class="dx-field">
+        <div class="dx-field" style="width:50%; float:left; margin-right:5%;">
+
+            <div class="dx-field-label">Taille du text</div>
+            <div class="dx-field-value">
+                <div dx-number-box="sizeFontTreeView"></div>
+            </div>
+
+            <div class="dx-field-label">Afficher l'info-bulle</div>
+            <div class="dx-field-value">
+                <div dx-check-box="checkBoxToolTip"></div>
+            </div>
+        </div>
+
+        <div class="dx-field">
+            <div class="dx-field-label">Police utilisée</div>
+            <div class="dx-field-value">
+                <div dx-lookup="familyFontTreeView"></div>
+            </div>
+        </div>   
+    </div>
+
+    <hr />
+    <div class="dx-viewport" style="width:50%;">
+        <h3>{{TVerror}}</h3>
+
+        <div id="small-indicator" dx-load-indicator="{height: 100, width: 100}" ng-if="loadingIndicator">
+        </div>
+
+        <div id="simple-treeview" dx-tree-view="treeView" style="font-size:{{fontSizeTreeView}}px">
+        </div>
+
+        <div dx-tooltip="toolTip" id="toolTip">
+            <p id="toolTipText"></p> <!-- Fill by innerHTML in js code -->
+        </div>
+
+    </div>
+
+
+    <div dx-resizable="zoneDetail" id="zone-detail" ng-if="treeviewClickItem">
+
+        <button type="button" class="close" aria-label="Close" ng-click="treeviewClickItem = false">
+            <span aria-hidden="true">&times;</span>
+        </button>
+
+        <div dx-scroll-view="zoneScroll" id="scrollview" style="font-size:{{fontSizeDetail}}px">
+            <p id="zone-detail-text"></p> <!-- Fill by innerHTML in js code -->
+        </div>
+
+        <div id="font-size">
+
+            <button class="btnFontSize" ng-click="increaseFont()">+</button>
+            <button class="btnFontSize" ng-click="decreaseFont()">-</button>
+
+            <!--
+            <button type="button" class="btn btn-default btn-sm" ng-click="increaseFont()">
+                <span class="glyphicon glyphicon-plus"></span> +
+            </button>
+
+            <button type="button" class="btn btn-default btn-sm" ng-click="decreaseFont()">
+                <span class="glyphicon glyphicon-minus"></span> -
+            </button>
+            -->
+        </div>
+
+    </div>
+    <br />
+</div>
+

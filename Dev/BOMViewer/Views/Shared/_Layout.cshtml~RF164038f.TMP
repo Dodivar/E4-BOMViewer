@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html ng-app="BOMViewer">
+<head>
+    <base href="/">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title ng-cloak>BOMViewer - {{PageTitle.getTitle}}</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+
+    <script src="~/Content/Items/menuItems.js"></script>
+
+
+</head>
+<body>
+    <!-- EN-TETE -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <a href='@Url.Action("Index", "Home", new { area = "" })'>
+                <img src="Content/img/SchmidtGroupe.png" style="height: 42px; margin:4px;" alt="Home Page">
+            </a>
+
+
+            <script type="text/ng-template" id="templates/@templateName">
+                @Html.Partial("~/Views/AngularTemplates/Templates/" + templateName + ".cshtml")
+            </script>
+
+            <!--
+    <div class="MenuToLoad">
+        <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.common.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.spa.css" />
+        <link rel="dx-theme" data-theme="generic.light" href="https://cdn3.devexpress.com/jslib/18.1.4/css/dx.light.css" />
+
+        <div class="dx-viewport" ng-controller="Menu">
+            <div>
+                <div dx-menu="menuOptions">
+                </div>
+            </div>
+        </div>
+    </div>
+        -->
+        </div>
+    </div>
+    <!-- EN-TETE FIN -->
+
+
+    <div class="container body-content">
+        <!-- Section ou l'HTML se remplacera -->
+        @RenderBody()
+        <hr />
+        <footer>
+            <p style="text-align:center;">&copy; @DateTime.Now.Year - DOSI MSM - Schmidt Groupe</p>
+        </footer>
+    </div>
+
+
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/BOMViewer")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,97 @@
+﻿'use strict';
+
+var BOMViewer = angular.module('BOMViewer', ['ngRoute', 'ngStorage', 'dx']);
+
+BOMViewer
+    // Système de routage
+    .config(["$routeProvider", "$locationProvider",
+        function ($routeProvider, $locationProvider) {
+
+            /* ----- HOME -----*/
+            $routeProvider.when("/Home", {
+                templateUrl: "Home/Index"
+            });
+            $routeProvider.when("/Home/Index", {
+                templateUrl: "Home/Index"
+            });
+            $routeProvider.when("/Recherche", {
+                templateUrl: "Home/Recherche",
+                controller: "homeRecherche"
+            });
+            $routeProvider.when("/Default", {
+                templateUrl: "Home/Default",
+                controller: "DefaultTreeView"
+            });
+            /* ----- HOME -----*/
+
+
+            /* ----- CUSTOM -----*/
+            $routeProvider.when("/Custom", {
+                templateUrl: "Custom/Index"
+            });
+            $routeProvider.when("/Visualisation", {
+                templateUrl: "Custom/Visualisation",
+                controller: "customVisualisation"
+            });
+            $routeProvider.when("/Setting", {
+                templateUrl: "Custom/UserSetting",
+                controller: "customUserSetting"
+            });
+            /* ----- CUSTOM -----*/
+
+
+
+            $routeProvider.otherwise({ redirectTo: '/' });
+
+            $locationProvider.html5Mode(true).hashPrefix("!");
+        }
+    ]);
+
+BOMViewer
+     .service('User', function () {
+        var listeP; // Liste principal après modification
+        var listeS; // Liste détail après modification
+        var listeDefaultP; // Liste principal lors du chargement de la vue
+        var listeDefaultS; // Liste détail lors du chargement de la vue
+        var idTypeLine;
+        var color; // texte JSON de la couleur des types de ligne 
+
+        return {
+            getListeP: function () {
+                return listeP;
+            },
+            getListeS: function () {
+                return listeS;
+            },
+            getListeDefaultP: function () {
+                return listeDefaultP;
+            },
+            getListeDefaultS: function () {
+                return listeDefaultS;
+            },
+            getIdTypeLine: function () {
+                return idTypeLine;
+            },
+            setListeP: function (value) {
+                listeP = value;
+            },
+            setListeS: function (value) {
+                listeS = value;
+            },
+            setListeDefaultP: function (value) {
+                listeDefaultP = value;
+            },
+            setListeDefaultS: function (value) {
+                listeDefaultS = value;
+            },
+            setIdTypeLine: function (value) {
+                idTypeLine = value;
+            },
+            getColor: function () {
+                return color;
+            },
+            setColor: function (value) {
+                color = value;
+            }
+        };
+    });

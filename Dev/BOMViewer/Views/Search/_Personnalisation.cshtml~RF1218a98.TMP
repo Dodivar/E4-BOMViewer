@@ -1,0 +1,13 @@
+﻿@{
+    ViewBag.Title = "Personnalisation";
+}
+
+<h2>Personnalisation</h2>
+<div class="jumbotron" ng-controller="Autre">
+
+    <h2>{{message}}</h2>
+
+    Test : <input type="text" ng-model="test" />
+    {{test}}
+
+</div>

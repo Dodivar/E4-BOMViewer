@@ -1,0 +1,90 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="title col-sm-12">
+    <h1>Recherche d'une commande</h1>
+</div>
+
+
+<div ng-controller="searchRecherche" ng-init="init()" ng-cloak>
+    
+    <div class="row">
+        <div class="col-12 col-md-5">
+            <form ng-submit="getFormValue()">
+                <div id="form-container">
+                    <div id="form" dx-form="formOptions"></div>
+                </div>
+            </form>
+        </div>
+
+        <div class="offset-md-1 col-12 col-md-5">
+            <div dx-pie-chart="chartOptions"></div>
+            <hr />
+            <div class="dx-field">
+                <div class="dx-field-label">Dernière commande recherchée : </div>
+                <div class="dx-field-value">
+                    <div dx-button="orderButtonOptions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="popup" dx-popup="popupOptions">
+        <div class="dx-fieldset">
+            <h6 style="color:#CEA54A;">{{withoutOrderMsg}}</h6>
+            <hr />
+
+            <!-- LIST -->
+            <div dx-list="listOrderLineImport" dx-item-alias="line">
+
+                <div data-options="dxTemplate: {name: 'item'}">
+                    <div class="line">
+
+                        <!-- WAIT -->
+                        <span ng-if="!line.isImported && !line.load">
+                            {{line.TODISPLAY}}
+
+                        </span>
+
+                        <!-- LOAD -->
+                        <div ng-if="line.load">
+                            <span id="small-indicator" dx-load-indicator="{height: 20, width: 20}"></span>
+                            {{line.TODISPLAY}}
+                        </div>
+
+                        <!-- IS IMPORTED-->
+                        <span ng-if="line.isImported" style="color: lightgreen; font-weight: 700;">
+                            <i class="fa fa-check" style="margin-right: 10px;"></i>{{line.TODISPLAY}}
+                        </span>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div dx-button="btnCancelImport" style="float:right;"></div>
+        <p>{{nbLineImported}}/{{orderLineToImport.length}}</p>
+
+
+    </div>
+</div>
+
+
+<!-- List de version
+    <div class="dx-field" ng-if="withOrder">
+        <div id="fieldContainer" dx-lookup="lookupOptionsVersion"></div>
+    </div>
+
+
+    <div class="dx-fieldset" ng-if="withOrder">
+        <div class="dx-field">
+            <div dx-button="importButton"></div>
+            <div dx-button="versionButton" style="float:right;"></div>
+        </div>
+
+    </div>
+     -->

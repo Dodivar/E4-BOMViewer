@@ -1,0 +1,23 @@
+﻿@{
+    ViewBag.Title = "Treeview Default";
+    if (Layout == null)
+    {
+        Layout = "~/Views/Shared/ForPartialViews/HomeMaster.cshtml";
+    }
+}
+
+<div ng-controller="DefaultTreeView">
+
+    <hr />
+    <div class="dx-viewport">
+        <div class="form">
+            <div id="simple-treeview" dx-tree-view="treeViewOptions"></div>
+        </div>
+    </div>
+
+    <br /><hr />
+    <span ng-cloak ng-if="jsonToDisplay" style="font-weight:bold; color:red;">DATA :</span>
+    <span ng-bind="jsonToDisplay"></span>
+</div>
+
+<script src="~/Content/Items/defaultTreeView.js"></script>

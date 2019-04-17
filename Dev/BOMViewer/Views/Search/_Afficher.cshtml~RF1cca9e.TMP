@@ -1,0 +1,26 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<div ng-controller="homeTreeView">
+
+    <div class="detailOrder">
+        <span style="font-weight:bold;">
+            Bibliothèque : {{Library}}  <br />
+            N° de commande : {{Order}}  <br />
+            <span ng-if="Line">N° de ligne : {{Line}}</span>
+        </span>
+    </div>
+
+    <hr />
+    <div class="dx-viewport">
+        <div class="form">
+            <div id="simple-treeview" dx-tree-view="treeViewOptions"></div>
+        </div>
+    </div>
+
+    <br /><hr />
+    <span ng-cloak ng-if="jsonToDisplay" style="font-weight:bold; color:red;">DATA :</span>
+    <span ng-bind="jsonToDisplay"></span>
+</div>
+

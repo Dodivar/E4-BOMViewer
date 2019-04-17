@@ -1,0 +1,118 @@
+﻿using BOMViewer.Models;
+using IBM.Data.DB2.iSeries;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Configuration;
+using System.Web.Mvc;
+using System.Web.Routing;
+
+namespace BOMViewer.Controllers
+{
+    public class ApiController : Controller
+    {
+        private readonly string SqlCnxStr = WebConfigurationManager.ConnectionStrings["Pro-Cfg-SqlCnxStr"].ToString();
+        private readonly string AS400CnxStr = WebConfigurationManager.ConnectionStrings["AS400CnxStr"].ToString();
+
+        // GET: Api/...
+        [HttpGet]
+        public bool GetOrderFromAs400(Recherche recherche)
+        {
+            string bib = recherche.Library.ToUpper();
+            string agence = recherche.Agency;
+            int commande = recherche.Order;
+            int ligne = recherche.Line;
+            string bibTable, agencyColumn, SQLStatement, jsonOrder = "";
+
+            try
+            {
+                // AS400 Connection
+                iDB2ConnectionStringBuilder iDB2CnxStrBuilder = new iDB2ConnectionStringBuilder { ConnectionString = AS400CnxStr };
+                AS400Manager _AS400 = new AS400Manager(iDB2CnxStrBuilder.ConnectionString);
+
+                // to improve
+                if (bib == "GCFILELIB")
+                {
+                    agencyColumn = "CDAG";
+                    if (ligne == 0)
+                    {
+                        bibTable = "CDENT";
+                    }
+                    else
+                        bibTable = "CDLGN";
+                }
+                else if (bib == "DCEXPLF")
+                {
+                    bibTable = "CDTEC";
+                }
+                else // HISTOTEC
+                    bibTable = "NGCPP";
+                    agencyColumn = "NGAG";
+
+
+                if (ligne >= 10)
+                {
+                    SQLStatement = "select * from " + bib + "." + bibTable + " where cdno$d = " + commande + " and CDAG = " + agence + " CDLG$D = " + ligne;
+                }
+                else
+                    SQLStatement = "select * from " + bib + "." + bibTable + " where cdno$d = " + commande + " and CDAG = " + agence;
+
+                jsonOrder = _AS400.ConvertDataTabletoJsonString(AS400CnxStr, SQLStatement);
+
+
+                /* Get DataTable from AS400
+                DataTable ASQuery = _AS400.GetData(AS400CnxStr, SQLStatement);
+                */
+
+                /* Export it to XML file
+                _AS400.ExportToXML(AS400CnxStr, SQLStatement, commande, ligne);
+                */
+
+                /* Serialize JSON to a file
+                System.IO.File.WriteAllText("c:/users/dillensegerd/desktop/BOMViewer-XML/" + commande + "_" + ligne + ".json", jsonOrder);
+                */
+
+                // Call a Stored Procedure to duplicate JSON data of order
+                SQLServerManager sql = new SQLServerManager(SqlCnxStr);
+                sql.SP_ImportOrderFromAS400(SqlCnxStr, "   ", commande, "MURPHY_CT", bib);
+
+                return true;
+            }
+
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+
+        }
+
+        
+        [HttpGet]
+        public string GetOrderFromDbViewer(Recherche recherche)
+        {           
+            SQLServerManager sql = new SQLServerManager(SqlCnxStr);
+            string jsonOrder = sql.ImportJsonFromDbViewer(SqlCnxStr, recherche.Order);
+
+            return jsonOrder;
+        }
+
+
+        [HttpGet]
+        public string GetNomenclatureLines (Recherche recherche)
+        {
+            string Query, jsonOrder = "";            
+
+            SQLServerManager SQL = new SQLServerManager(SqlCnxStr);
+
+            Query = SQL.SP_GetOrderLine(AS400CnxStr, recherche.Agency, recherche.Order);
+
+            //jsonOrder = _AS400.ConvertDataTabletoJsonString(AS400CnxStr, Query);
+            return Query;
+        }
+
+    }
+
+}

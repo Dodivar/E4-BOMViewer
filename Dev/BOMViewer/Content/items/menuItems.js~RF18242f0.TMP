@@ -1,0 +1,38 @@
+﻿var menu = [{
+    id: "1",
+    name: "Visualisation",
+    url: 'Home/Index',
+    items: [{
+        id: "1_1",
+        name: "de commande",
+        url: "Home/Index"
+    }, {
+        id: "1_2",
+        name: "en mode comparatif",
+        url: "Compare/Index"
+    }]
+}, {
+    id: "2",
+        name: "Personnaliser",
+    url: "/Custom/Index",
+    items: [{
+        id: "2_1",
+        name: "L'interface",
+        url: "/Custom/Index"
+    }, {
+        id: "2_2",
+        name: "L'affichage d'une visualisation",
+        url: "/Custom/Index"
+    }]
+}, {
+    id: "3",
+    name: "Projectors",
+    items: [{
+        id: "3_1",
+        name: "Projector Plus",
+        items: [{
+            id: "3_1_1",
+            name: "Autre"
+        }]
+    }]
+}];

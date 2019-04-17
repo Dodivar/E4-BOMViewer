@@ -1,0 +1,341 @@
+﻿'use strict';
+angular.module('BOMViewer')
+    .controller('Menu', Menu)
+    .controller('homeRecherche', homeRecherche)
+    .controller('homeTreeView', homeTreeView)
+    .controller('DefaultTreeView', DefaultTreeView);
+
+
+
+// Injection des dépendances des contrôleurs
+Menu.$inject = ['$scope', '$location'];
+homeRecherche.$inject = ['$scope', '$http', '$window', 'localstorage', 'User'];
+homeTreeView.$inject = ['$scope', '$http', '$window', 'localstorage', 'User'];
+DefaultTreeView.$inject = ['$scope', '$http'];
+
+// --- CONTROLLER PART ---\\
+// MENU \\
+function Menu($scope, $location) {
+    var showSubmenuModes = [{
+        name: "onHover",
+        delay: { show: 0, hide: 500 }
+    }, {
+        name: "onClick",
+        delay: { show: 0, hide: 300 }
+    }];
+
+    $scope.showFirstSubmenuMode = showSubmenuModes[0];
+    $scope.orientation = "horizontal";
+    $scope.submenuDirection = "rightOrBottom";
+    $scope.closeOnMouseLeave = true;
+
+    $scope.menuOptions = {
+        dataSource: menu,
+        displayExpr: "name",
+        onItemClick: function (data) {
+            location.replace(data.itemData.url);
+        },
+        bindingOptions: {
+            showFirstSubmenuMode: "showFirstSubmenuMode",
+            orientation: "orientation",
+            submenuDirection: "submenuDirection",
+            hideSubmenuOnMouseLeave: "closeOnMouseLeave"
+        }
+    };
+}
+
+// FORM \\
+function homeRecherche($scope, $http, $window, localstorage, User) {
+
+    
+    $scope.disableButton = true;
+
+    $scope.Library = [
+        { id: '1', Lib: 'GCFILELIB' },
+        { id: '2', Lib: 'DCEXPLF' },
+        { id: '3', Lib: 'HISTOTEC' }];
+
+    $scope.Agency = [
+        { id: '1', Age: '   ', Lib: 'FRA' },
+        { id: '2', Age: '100', Lib: 'ALL' },
+        { id: '3', Age: '200', Lib: 'ESP' }];
+
+    $scope.reset = function () {
+        $scope.selectedLibrary = angular.copy($scope.Library.Lib);
+        $scope.Agency.Age = angular.copy();
+        $scope.selectedOrder = angular.copy();
+        $scope.selectedLine = angular.copy();
+    };
+
+
+    $scope.getNumberOrderVersion = function () {        
+        $http({
+            url: 'Api/GetNumberOrderVersion',
+            method: 'GET',
+            params: {
+                OrderAgence: $scope.Agency.Age,
+                OrderNumber: $scope.selectedOrder                
+            }
+        }).then(function (response) {            
+            $scope.numberOrderVersion = response.data.length; //nb version
+            $scope.allNumberOrderVersion = response.data; // liste numéro de version
+            //console.log($scope.numberOrderVersion);
+            //console.log($scope.allNumberOrderVersion);
+            $scope.popup = true;
+            $scope.withOrder = false;
+            $scope.withoutOrder = false; 
+            localstorage.set("TitlePopUp", $scope.selectedOrder)
+
+            
+            $scope.popupOptions = {
+                width: 500,
+                height: 300,
+                showTitle: true,      
+                title: "Commande : " + $scope.selectedOrder,
+                closeOnOutsideClick: true,
+                bindingOptions: {
+                    visible: "popup"                    
+                }
+            };
+            
+            if ($scope.numberOrderVersion == 0) {
+                $scope.withoutOrder = true; 
+                $scope.forLoadIndicator = true; 
+                $scope.withoutOrderMsg = "en cours...";
+                $scope.CopyOrderFromAS400();
+            }
+            else {      
+                $scope.withOrder = true;
+
+                $("#fieldContainer").dx-field("dispose");
+                $("#fieldContainer").remove();
+                
+                // TODO :: Si une ligne spécifique est sélectionné d'une version, n'afficher que celle-ci
+                $scope.lookupOptionsVersion = {
+                    dataSource: $scope.allNumberOrderVersion,
+                    showPopupTitle: true,
+                    closeOnOutsideClick: true,
+                    placeholder: "Sélectionner un numéro de version",
+                    displayExpr: "OrderVersion",
+                    onItemClick: function (item) {
+                        $scope.orderVersionSelected = item.itemData.OrderVersion,
+                        $scope.showButton = false
+                    },
+                    bindingOptions: {
+                        visible: "withOrder"
+                    },
+                    onContentReady: function (e) {
+                        $scope.lookupOptionsVersionInstance = e.component;
+                    },
+                };
+
+
+                $scope.applyButton = {
+                    text: "Ok",
+                    type: "success",
+                    width: 150,
+                    bindingOptions: {
+                        disabled: "showButton",
+                        visible: "withOrder"
+                    },                   
+                    onClick: function (e) {
+                        $http({
+                            url: 'Api/GetSpecifiedOrderVersion',
+                            method: 'GET',
+                            params: {
+                                OrderAgence: $scope.Agency.Age,
+                                OrderNumber: $scope.selectedOrder,
+                                OrderVersion: $scope.orderVersionSelected,
+                                ID_View: 3
+                            }
+                        }).then(function (response) {
+                            // Retourne l'id de la version de la commande spécifiée
+                            $scope.IdOrderNumber = response.data;
+                            $scope.SendToTreeView();
+                        });
+                    }
+                };
+
+                $scope.okButton = {
+                    text: 'Importer à nouveau',
+                    type: 'normal',
+                    width: 150,
+                    onClick: function (e) {
+                        $scope.CopyOrderFromAS400();
+                    }
+                };
+
+            }
+        });
+    };
+
+    $scope.CopyOrderFromAS400 = function (e) {
+        $http({
+            url: 'Api/CopyOrderFromAS400',
+            method: 'GET',
+            params: {
+                Library: $scope.selectedLibrary.Lib,
+                Agency: $scope.Agency.Age,
+                Order: $scope.selectedOrder,
+                Line: $scope.selectedLine
+            }
+        }).then(function (response) {
+            if (response.data === null) {
+                alert("La recherche de la commande n'a pas abouti, retour : " + response.data);
+            }
+            else {                                
+                $scope.import = true; // To display another texte on pop-up 
+                $scope.forLoadIndicator = false; 
+                $scope.withoutOrderMsg = "effectué !";
+                $scope.IdOrderNumber = response.data;
+                $scope.SendToTreeView();
+            }
+        }), function (response) {
+                console.log(response);
+                alert(reponse);
+        };
+    };
+
+    //TODO :: A exécuter dans un service
+    $scope.getUserColor = function (e) {
+        $http({
+            url: 'Api/GetUserColorSetting',
+            method: 'GET',
+            params: {
+                ID_User: 2
+            }
+        }).then(function (response) {
+            $scope.UserColorSetting = response.data;
+            console.log($scope.UserColorSetting);
+            User.setColor($scope.UserColorSetting);
+
+            $scope.colorValue = {
+                Commande: User.getColor()[0].Color,
+                Ligne: User.getColor()[1].Color,
+                Pere: User.getColor()[2].Color,
+                Fils: User.getColor()[3].Color,
+                Virtuelle: User.getColor()[4].Color,
+                Usinage: User.getColor()[5].Color,
+                EtapeUsi: User.getColor()[6].Color,
+                MatiereGen: User.getColor()[7].Color,
+                IPM: User.getColor()[8].Color,
+                Fabrication: User.getColor()[9].Color,
+                GammeOpe: User.getColor()[10].Color,
+                PDC: User.getColor()[11].Color,
+                InfpsProcPDC: User.getColor()[12].Color,
+                LigneColis: User.getColor()[13].Color
+            };
+
+            localstorage.setObject('colorValue', $scope.colorValue);
+            //console.log(localstorage.getObject('colorValue', "marche pas"));
+
+        }), function (response) {
+            console.log(response);
+            alert(reponse);
+        };
+    };
+
+    $scope.SendToTreeView = function (e) {      
+        var TreeViewPage = window.open("Home/Treeview");
+        TreeViewPage.IdOrderNumber = $scope.IdOrderNumber;
+        TreeViewPage.selectedOrder = $scope.selectedOrder;
+        TreeViewPage.Library = $scope.selectedLibrary.Lib;
+        TreeViewPage.Agency = $scope.Agency.Lib;
+        TreeViewPage.Line = $scope.selectedLine;
+
+    }
+    
+}
+
+
+// DEVEXPRESS TREEVIEW \\
+function homeTreeView($scope,  $http, $window, localstorage, User) {  
+
+    $scope.IdOrderNumber = window.IdOrderNumber;
+    $scope.Order = window.selectedOrder;
+    $scope.Library = window.Library;
+    $scope.Agency = window.Agency;
+    $scope.Line = window.Line;
+    //console.log($scope.IdOrderNumber);
+    
+    $scope.colorValue = localstorage.getObject('colorValue', "Aucune donnée transmise (colorValue)");
+    //console.log($scope.colorValue);
+
+
+    $scope.toolTipOfNodeText = "";
+    $scope.toolTipElement = "";
+
+    $http({
+        url: 'Api/GetCustomJsonOrder',
+        method: 'GET',
+        params: {
+            idOrder: $scope.IdOrderNumber,
+            idView: 3
+        }
+    }).then(function (response) {
+        $scope.jsonOrder = response.data;
+        //console.log($scope.jsonOrder);
+      
+        $scope.treeView = {
+            items: $scope.jsonOrder,
+            dataStructure: "plain",
+            parentIdExpr: "IdTreeviewParent",
+            keyExpr: "IdTreeview",
+            displayExpr: "NodeText",
+            onItemRendered: function (e) {
+                e.itemElement.css('color', e.itemData.TypeLine === 'C' ? $scope.colorValue.Commande : e.itemData.TypeLine === 'A' ? $scope.colorValue.Ligne : 'red')
+            },
+            onInitialized: function (e) {
+                $scope.instanceTreeView = e.component;
+            },
+            onItemClick: function (e) {
+                $scope.toolTipOfNodeText = e.itemData.NodeToolTip;
+                $scope.toolTipElement = e.itemElement;
+                console.log($scope.toolTipOfNode);
+
+                $scope.$watch("toolTipElement", NodeToolTip(e));
+
+
+                }
+                
+        }
+
+        $scope.NodeToolTip = function (e) {
+            $scope.defaultModeOptions = {
+                target: $scope.toolTipElement,
+                showEvent: "dxhoverstart",//"mouseenter",
+                hideEvent: "dxhoverend",
+                position: "bottom"
+            };
+        };
+
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+        };
+
+
+
+  
+}
+
+
+
+function DefaultTreeView($scope) {
+    console.log(defaultTreeView);
+
+    $scope.treeViewOptions = {
+        items: defaultTreeView,
+        dataStructure: "plain",
+        parentIdExpr: "ID_CpBOM_Parent",
+        keyExpr: "ID_ComponentBOM",
+        displayExpr: "CpBOMType",
+
+        onItemRendered: function (e) {
+            e.itemElement.css('color', e.itemData.CpBOMType === 'P' ? 'blue' : e.itemData.CpBOMType === 'N' ? 'red' : 'cyan');
+        }        
+        /*,onItemClick: function (e) {
+            e.itemElement.css('background-color', e.itemData.CpBOMType === 'P' ? 'grey' : e.itemData.CpBOMType === 'N' ? 'green' : 'black');            
+        }*/
+    };
+}

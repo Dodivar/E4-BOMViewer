@@ -1,0 +1,73 @@
+﻿'use strict';
+angular.module('BOMViewer')
+    .controller('menu', menu)
+    .conttroller('homeAccueil', homeAccueil);
+
+
+
+// Injection des dépendances des contrôleurs
+menu.$inject = ['$scope', '$location'];
+homeAccueil.$inject = ['$scope', '$location', 'User'];
+
+
+// --- CONTROLLER PART ---\\
+// MENU \\
+function menu ($scope, $location) {
+    var showSubmenuModes = [{
+        name: "onHover",
+        delay: { show: 0, hide: 500 }
+    }, {
+        name: "onClick",
+        delay: { show: 0, hide: 300 }
+    }];
+
+    $scope.showFirstSubmenuMode = showSubmenuModes[0];
+    $scope.orientation = "horizontal";
+    $scope.submenuDirection = "rightOrBottom";
+    $scope.closeOnMouseLeave = true;
+
+    $scope.menuOptions = {
+        dataSource: menu,
+        displayExpr: "name",
+        onItemClick: function (data) {
+            location.replace(data.itemData.url);
+        },
+        bindingOptions: {
+            showFirstSubmenuMode: "showFirstSubmenuMode",
+            orientation: "orientation",
+            submenuDirection: "submenuDirection",
+            hideSubmenuOnMouseLeave: "closeOnMouseLeave"
+        }
+    };
+}
+
+
+function homeAccueil($scope, $location, User) {
+    // Affiche la liste des tables 
+    $http({
+        url: 'Api/GetViewList',
+        method: 'GET', 
+        params: {
+            ID_User: User.getID_User()
+        }
+    }).then(function (response) {
+        $scope.resultTable = response.data;
+
+        // List of Table
+        $scope.lookupOptionsTable = {
+            dataSource: $scope.resultTable,
+            showPopupTitle: false,
+            closeOnOutsideClick: true,
+            placeholder: "Sélectionner une table",
+            displayExpr: "TableName",
+            onValueChanged: function (e) {
+                console.log(e.itemData);
+            }
+        };
+    }), function (response) {
+        console.log(response);
+        alert(reponse);
+    };    
+}
+
+

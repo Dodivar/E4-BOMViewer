@@ -1,0 +1,21 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div>
+    <h1>Comparatif</h1>
+    <ul>
+        <li><a href="/">3CAD - CT</a></li>
+        <li><a href="/">3CAD - 3CAD</a></li>
+        <li><a href="/">CT - CT</a></li>
+    </ul>
+
+    {{message}}
+    <span ng-bind="message"></span>
+
+    <div ng-view></div>
+
+</div>
+
+

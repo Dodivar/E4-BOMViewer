@@ -1,0 +1,40 @@
+﻿@{
+    ViewBag.Title = "Recherche";
+}
+
+<div ng-controller="searchTreeView">
+
+    <div class="detailOrder">        
+        <p style="font-weight:bold;">
+            Bibliothèque : {{Library}}  <br />
+            N° de commande : {{Agency}} - {{Order}}<br />
+            <span ng-if="Line">N° de ligne : {{Line}}</span>
+        </p>        
+    </div>
+
+    <hr />
+    <div class="dx-viewport" style="width:50%;">
+
+        <div id="simple-treeview" dx-tree-view="treeView">
+        </div>
+
+        <div dx-tooltip="toolTip" id="toolTip">
+            <p id="toolTipText"></p> <!-- Fill by innerHTML in js code -->
+        </div>
+
+    </div>
+
+
+    <div dx-resizable="zoneDetail" id="zone-detail">
+        <div dx-scroll-view="zoneScroll" id="scrollview">
+                <p id="zone-detail-text" style="font-size:{{fontSize}}px"></p> <!-- Fill by innerHTML in js code -->
+            </div>
+            <div id="font-size">
+                <button class="btnFontSize" ng-click="increaseFont()">+</button>
+                <button class="btnFontSize" ng-click="decreaseFont()">-</button>
+            </div>
+        </div>
+
+        <br />
+    </div>
+

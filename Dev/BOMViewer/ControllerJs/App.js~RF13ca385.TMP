@@ -1,0 +1,439 @@
+﻿'use strict';
+
+var BOMViewer = angular.module('BOMViewer', ['ngRoute', 'ngStorage', 'dx']);
+
+BOMViewer
+    // Système de routage
+    .config(["$routeProvider", "$locationProvider",
+        function ($routeProvider, $locationProvider) {
+
+            /* ----- HOME -----*/
+            $routeProvider.when("/", {
+                templateUrl: "Home/Index"
+            });
+
+
+
+            /* ----- SEARCH -----*/
+            $routeProvider.when("/Search", {
+                templateUrl: "Search/Index"
+            });
+            $routeProvider.when("/Search/Index", {
+                templateUrl: "Search/Index"
+            });
+            $routeProvider.when("/Recherche", {
+                templateUrl: "Search/Recherche",
+                controller: "searchRecherche"
+            });
+            $routeProvider.when("/Default", {
+                templateUrl: "Search/Default",
+                controller: "DefaultTreeView"
+            });
+
+
+            /* ----- CUSTOM -----*/
+            $routeProvider.when("/Custom", {
+                templateUrl: "Custom/Index"
+            });
+            $routeProvider.when("/Visualisation", {
+                templateUrl: "Custom/Visualisation",
+                controller: "customVisualisation"
+            });
+            $routeProvider.when("/Setting", {
+                templateUrl: "Custom/UserSetting",
+                controller: "customUserSetting"
+            });            
+
+
+            $routeProvider.otherwise({ redirectTo: '/' });
+
+            $locationProvider.html5Mode(true).hashPrefix("!");
+        }
+    ]);
+
+
+// Au lancement de l'application
+BOMViewer.run(function ($rootScope, $http) {
+    // Ne s'exécute seulement après les autres controlleurs..
+});
+
+
+BOMViewer
+    .factory('User', ['$http', 'localstorage', function ($http, localstorage) {
+        var ID_User = 2;
+        var color; // texte JSON de la couleur des types de ligne 
+        var colorValue; // Objet avec toutes les valeurs de couleur par nom de ligne (ex : Commande, Père, Fils...)
+        var ID_View;
+
+        return {
+            getID_User: function () {
+                return ID_User;
+            },
+
+            setID_User: function (value) {
+                ID_User = value;
+            },
+
+            getColor: function (ID_User) {
+                return $http({
+                    url: 'Api/GetUserColorSetting',
+                    method: 'GET',
+                    params: {
+                        ID_User: ID_User
+                    }
+                }).then(function (response) {
+                    var userColorSetting = response.data;
+                    //console.log(userColorSetting);
+
+                    var colorValue = {
+                        Commande: userColorSetting[0].Color,
+                        Ligne: userColorSetting[1].Color,
+                        Pere: userColorSetting[2].Color,
+                        Fils: userColorSetting[3].Color,
+                        Virtuelle: userColorSetting[4].Color,
+                        Usinage: userColorSetting[5].Color,
+                        EtapeUsi: userColorSetting[6].Color,
+                        MatiereGen: userColorSetting[7].Color,
+                        IPM: userColorSetting[8].Color,
+                        Fabrication: userColorSetting[9].Color,
+                        GammeOpe: userColorSetting[10].Color,
+                        PDC: userColorSetting[11].Color,
+                        InfosProcPDC: userColorSetting[12].Color,
+                        LigneColis: userColorSetting[13].Color
+                    };
+                    localstorage.setObject('colorValue', colorValue);
+                })
+
+                //console.log(localstorage.getObject('colorValue', "colorValue erreur"));
+            },
+
+            setColor: function (ID_User, colorValueList) {
+                $http({
+                    url: 'Api/UpdateUserColorSetting',
+                    method: 'GET',
+                    params: {
+                        ID_User: ID_User,
+                        ColorValueList: colorValueList
+                    }
+                }).then(function (response) {
+                    //console.log(response.data);
+                    DevExpress.ui.notify("Jeu de couleur sauvegardé pour votre profil !", "success", 3000)
+
+                }), function (response) {
+                    console.log(response);
+                };
+            },
+
+            setID_View: function (user, view) {
+                $http({
+                    url: 'Api/UpdateLastViewUsed',
+                    method: 'GET',
+                    params: {
+                        ID_User: user,
+                        ID_View: view
+                    }
+                }).then(function (response) {
+                    //console.log(response.data);                
+                }), function (response) {
+                    console.log(response);
+                    alert(reponse);
+                };
+
+                localstorage.set('ID_View', view)
+                ID_View = view;
+            },
+
+            getID_View: function (user) {
+                $http({
+                    url: 'Api/GetLastViewUsed',
+                    method: 'GET',
+                    params: {
+                        ID_User: user
+                    }
+                }).then(function (response) {
+                    //console.log(response.data);                
+                    localstorage.set('ID_View', response.data[0].ID_View)
+
+                }), function (response) {
+                    console.log(response);
+                    alert(reponse);
+                };
+
+                ID_View = localstorage.get('ID_View', null)
+                return ID_View;
+            }
+        };
+    }]);
+
+
+BOMViewer
+    .factory('Order', ['$http', 'localstorage', function ($http, localstorage) {
+        // All data needed for an order
+        var Order = {
+            IdOrder: 0,
+            OrderNumber: 0, 
+            Library: '',
+            Agency: '',
+            AgencyText: '',
+            Line: 0,
+            Version: 0
+        };        
+
+        return {
+            // Open new tab to load TreeView
+            sendToTreeView: function (data) {
+                var res = false;
+                Order.IdOrder = data.IdOrder;
+                Order.OrderNumber = data.OrderNumber;
+                Order.Library = data.Library;
+                Order.Agency = data.Agency;
+                Order.AgencyText = data.AgencyText;
+                Order.Line = data.Line;
+                Order.Version = data.Version;
+
+                if (Order.Agency === '100')
+                    Order.agencyText = 'ALL';
+                else if (Order.Agency === '200')
+                    Order.agencyText = 'ESP';
+                else
+                    Order.agencyText = 'FRA';
+
+                var TreeViewPage = window.open("Search/Treeview");
+                TreeViewPage.IdOrderNumber = Order.IdOrder;
+                TreeViewPage.selectedOrder = Order.OrderNumber;
+                TreeViewPage.Library = Order.Library;
+                TreeViewPage.AgencyNumber = Order.Agency;
+                TreeViewPage.Agency = Order.AgencyText;
+                TreeViewPage.Line = Order.Line;
+
+                res = true;
+                return res;
+            }
+        }
+
+    }]);
+
+
+
+BOMViewer
+    .factory('ViewSetting', [function () {
+        var primaryList; // Liste principal après modification (champ colonne)
+        var secondaryList; // Liste détail après modification
+        var primaryListInitial; // Liste principal initiale (lors du chargement de la vue)
+        var secondaryListInitial; // Liste détail initiale
+        var listLine; // liste de filtrage des types de ligne
+        var listLineInitial; // liste intiale de filtrage des types de ligne
+        var idTypeLine;
+        var isChangedField; // Savoir si la conf. des colonnes  doit être sauvegarder lors du clique Sauvegade/Annule
+        var isChangedLine;// Savoir si la conf. des lignes  doit être sauvegarder lors du clique Sauvegade/Annule
+
+
+        return {
+            getPrimaryList: function () {
+                return primaryList;
+            },
+            setPrimaryList: function (value) {
+                primaryList = value;
+            },
+            getSecondaryList: function () {
+                return secondaryList;
+            },
+            setSecondaryList: function (value) {
+                secondaryList = value;
+            },
+            getPrimaryListInitial: function () {
+                return primaryListInitial;
+            },
+            setPrimaryListInitial: function (value) {
+                primaryListInitial = value;
+            },
+            getSecondaryListInitial: function () {
+                return secondaryListInitial;
+            },
+            setSecondaryListInitial: function (value) {
+                secondaryListInitial = value;
+            },
+            getIdTypeLine: function () {
+                return idTypeLine;
+            },
+            setIdTypeLine: function (value) {
+                idTypeLine = value;
+            },
+            getListLine: function () {
+                return listLine;
+            },
+            setListLine: function (value) {
+                listLine = value;
+            },
+            setListLineInitial: function (value) {
+                listLineInitial = value;
+            },
+            getListLineInitial: function () {
+                return listLineInitial;
+            },
+            setIsChangedField: function (value) {
+                isChangedField = value;
+            },
+            getIsChangedField: function () {
+                return isChangedField;
+            },
+            setIsChangedLine: function (value) {
+                isChangedLine = value;
+            },
+            getIsChangedLine: function () {
+                return isChangedLine;
+            }
+        };
+    }]);
+
+BOMViewer
+    .factory('ViewSettingQuery', ['$http', 'ViewSetting', function ($http, ViewSetting) {
+        var primaryList;
+        var primaryListInitial;
+        var secondaryList;
+        var secondaryListInitial;
+        var i;
+
+        return {
+
+            getPreferenceColumnOfView: function (ID_View, ID_SubLevel) {
+
+                $http({
+                    url: 'Api/GetPreferenceColumnOfView',
+                    method: 'GET',
+                    params: {
+                        idView: ID_View,
+                        idSubLevel: ID_SubLevel
+                    }
+                }).then(function (response) {
+                    primaryList = [];
+                    secondaryList = [];
+                    i = 0;
+                    while (i !== response.data.length) {
+                        if (response.data[i].DetailLevel === 0) {
+                            primaryList.push(response.data[i].key); // KEY = ID_Column + _ + ID_TableSubLevel
+                        }
+                        else {
+                            secondaryList.push(response.data[i].key);
+                        }
+                        i++;
+                    }
+                    //console.log(primaryList);
+                    //console.log(secondaryList);
+
+                    ViewSetting.setPrimaryList(primaryList);
+                    ViewSetting.setSecondaryList(secondaryList);
+                    
+                }), function (response) {
+                    console.log(response);
+                    };
+            },
+
+            getPreferenceColumnOfViewAll: function (ID_View) {
+                $http({
+                    url: 'Api/GetPreferenceColumnOfViewAll',
+                    method: 'GET',
+                    params: {
+                        idView: ID_View
+                    }
+                }).then(function (response) {
+                    primaryListInitial = [];
+                    secondaryListInitial = [];
+                    i = 0;
+                    while (i !== response.data.length) {
+                        if (response.data[i].DetailLevel === 0) {
+                            primaryListInitial.push(response.data[i].key);
+                        }
+                        else {
+                            secondaryListInitial.push(response.data[i].key);
+                        }
+                        i++;
+                    }
+                    //console.log(primaryListInitial);
+                    //console.log(secondaryListInitial);
+
+                    ViewSetting.setPrimaryListInitial(primaryListInitial);
+                    ViewSetting.setSecondaryListInitial(secondaryListInitial);
+                }), function (response) {
+                    console.log(response);
+                };
+            },
+
+            updatePreferenceColumnOfView: function (ID_View, ID_SubLevel, primaryList, secondaryList) {
+                $http({
+                    url: 'Api/UpdatePreferenceColumnOfView',
+                    method: 'GET',
+                    params: {
+                        idView: ID_View,
+                        idSubLevel: ID_SubLevel,
+                        primaryList: primaryList,
+                        secondaryList: secondaryList
+                    }
+                }).then(function (response) {
+                    //console.log(response.data);
+                    if (response.data === 'False') {
+                        DevExpress.ui.notify('Erreur ! Sauvegarde échouée... (field)', "error", 1500)
+                    }
+                    else {
+                        DevExpress.ui.notify('Sauvegarde de la ligne réussie (field)', "success", 300);
+                    }
+
+                }), function (response) {
+                    console.log(response);
+                    alert(reponse);
+                };
+            },
+
+            updatePreferenceColumnOfViewAll: function (ID_View, primaryList, secondaryList) {
+                $http({
+                    url: 'Api/UpdatePreferenceColumnOfViewAll',
+                    method: 'POST',
+                    params: {
+                        idView: ID_View,
+                        primaryList: primaryList,
+                        secondaryList: secondaryList
+                    }
+                }).then(function (response) {
+                    //console.log(response.data);
+                    if (response.data === 'False') {
+                        DevExpress.ui.notify('Erreur ! Annulation des modifications échouée... (field)', "error", 1500)
+                    }
+                    else {
+                        DevExpress.ui.notify('Annulation des modifications réussie (field)', "success", 1500);
+                    }
+                }), function (response) {
+                    console.log(response);
+                    alert(reponse);
+                };
+            }
+        };
+    }]);
+
+
+BOMViewer
+    .factory('localstorage', ['$window', function ($window) {
+        return {
+            set: function (key, value) {
+                $window.localStorage[key] = value;
+            },
+            get: function (key, defaultValue) {
+                return $window.localStorage[key] || defaultValue || false;
+            },
+            setObject: function (key, value) {
+                $window.localStorage[key] = JSON.stringify(value);
+            },
+            getObject: function (key, defaultValue) {
+                if ($window.localStorage[key] != undefined) {
+                    return JSON.parse($window.localStorage[key]);
+                } else {
+                    return defaultValue || false;
+                }
+            },
+            remove: function (key) {
+                $window.localStorage.removeItem(key);
+            },
+            clear: function () {
+                $window.localStorage.clear();
+            }
+        }
+    }]);

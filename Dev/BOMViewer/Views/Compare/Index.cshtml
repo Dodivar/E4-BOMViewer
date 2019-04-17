@@ -1,0 +1,33 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Compare";
+}
+
+
+<div ng-controller="Compare">
+    <h1>Comparatif</h1>
+    <ul>
+        <li>
+            <a href="@Url.Action("Interface", "Custom")"
+               target="_blank">
+                3CAD - CT
+            </a>
+        </li>
+
+        <li>
+            <a href="@Url.Action("Visualisation", "Custom")"
+               target="_blank">
+                3CAD - 3CAD
+            </a>
+        </li>
+
+        <li>
+            <a href="@Url.Action("Visualisation", "Custom")"
+               target="_blank">
+                CT - CT
+            </a>
+        </li>
+    </ul>
+</div>
+
+
